@@ -15,8 +15,6 @@ public class BattleShip
 	public BattleShip()
 	{
 		try{
-			
-			
 			socket = new Socket(InetAddress.getByName("ec2-52-41-213-54.us-west-2.compute.amazonaws.com"), port);
 			writer = new PrintWriter(socket.getOutputStream());
 		

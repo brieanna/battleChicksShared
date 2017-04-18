@@ -17,8 +17,6 @@ public class OutgoingHandlerInterface {
 		System.out.println(user.toString());
 		return user.toString();
 	}
-	
-	
 
 	public static String sendChat(String message) {
 		JSONObject chat = new JSONObject();
