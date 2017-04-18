@@ -124,6 +124,8 @@ public class BattleShipGUI extends JFrame {
 		headPanel.add(winLosePanel);
 		twoPanel.add(headPanel);
 
+		
+		
 		// opponent Panel
 		threePanel = new JPanel(new GridLayout());
 		threePanel.setVisible(true);
