@@ -8,3 +8,4 @@ public class IncomingHandlerInterface {
 		System.out.println("this is the type: " + message.opt("type"));
 	}
 }
+// test
