@@ -10,10 +10,12 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTextArea;
 
 public class BattleChicks extends JFrame {
@@ -21,7 +23,9 @@ public class BattleChicks extends JFrame {
 	private int port = 8989;
 	private PrintWriter writer;
 	private ArrayList<String> shipCoordinates = new ArrayList<>();
-	JButton[][] myBoard;
+	private JButton[][] myBoard;
+	private int shipSize = 0;
+	JRadioButton horizontal;
 
 	public void runBattleGUI() {
 		JFrame frame = new JFrame();
@@ -39,6 +43,7 @@ public class BattleChicks extends JFrame {
 		enemyBoard.setVisible(true);
 		createEnemyBoard(enemyBoard);
 		mainPanel.add(enemyBoard);
+		
 
 		JPanel upperRightPnl = new JPanel();
 		upperRightPnl.setVisible(true);
@@ -64,6 +69,53 @@ public class BattleChicks extends JFrame {
 		JTextArea userNameTextArea = new JTextArea(3, 20);
 		userNameTextArea.setEditable(true);
 		upperRightPnl.add(userNameTextArea);
+		
+		horizontal = new JRadioButton("horizontal              ");
+		horizontal.setSelected(true);
+		JRadioButton vertical = new JRadioButton("vertical                  ");
+		ButtonGroup directionBtnGroup = new ButtonGroup();
+		directionBtnGroup.add(horizontal);
+		directionBtnGroup.add(vertical);
+		upperRightPnl.add(horizontal);
+		upperRightPnl.add(vertical);
+		
+		JRadioButton xLargeShip = new JRadioButton("XL Ship");
+		xLargeShip.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {		
+				shipSize = 5;
+			}
+		});
+		JRadioButton largeShip = new JRadioButton("L Ship");
+		largeShip.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {		
+				shipSize = 4;
+			}
+		});
+		JRadioButton mediumShip = new JRadioButton("M Ship");
+		mediumShip.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {		
+				shipSize = 3;
+			}
+		});
+		JRadioButton smallShip = new JRadioButton("S Ship");
+		smallShip.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {		
+				shipSize = 2;
+			}
+		});
+		ButtonGroup shipBtnGroup = new ButtonGroup();
+		shipBtnGroup.add(xLargeShip);
+		shipBtnGroup.add(largeShip);
+		shipBtnGroup.add(mediumShip);
+		shipBtnGroup.add(smallShip);
+		upperRightPnl.add(xLargeShip);
+		upperRightPnl.add(largeShip);
+		upperRightPnl.add(mediumShip);
+		upperRightPnl.add(smallShip);
 
 		JTextArea recieveChatTextArea = new JTextArea(20, 30);
 		recieveChatTextArea.setEditable(false);
@@ -91,6 +143,8 @@ public class BattleChicks extends JFrame {
 
 		frame.setVisible(true);
 	}
+
+	
 
 	private JButton[][] gameBoard = new JButton[10][10]; // Declared much
 															// earlier in the
@@ -132,8 +186,8 @@ public class BattleChicks extends JFrame {
 				gameBoard[row][column] = new JButton("" + letter + column);
 				gameBoard[row][column].setName("" + letter + column);
 				gameBoard[row][column].setOpaque(true);
-				gameBoard[row][column].setBackground(Color.PINK);
-				gameBoard[row][column].setForeground(Color.BLUE);
+				gameBoard[row][column].setBackground(Color.lightGray);
+				gameBoard[row][column].setForeground(Color.GRAY);
 				gameBoard[row][column].addActionListener(new ActionListener() {
 
 					@Override
@@ -182,11 +236,23 @@ public class BattleChicks extends JFrame {
 				System.out.print("column else " + x + " ,");
 			}
 		}
-		int i = 3; // size 4 ship   need for loop to change color and send coordinate to arrayList (skips the middle right now)
-		myBoard[row][column].setBackground(Color.ORANGE);	
-//		myBoard[row + 1][column].setBackground(Color.ORANGE); // makes ship verticle
-		myBoard[row][column + i].setBackground(Color.orange); // makes ship horizontal
+		addShipToBoard(row, column);
+//		int i = 3; // size 4 ship   need for loop to change color and send coordinate to arrayList (skips the middle right now)
+//		myBoard[row][column].setBackground(Color.ORANGE);	
+////		myBoard[row + 1][column].setBackground(Color.ORANGE); // makes ship vertical
+//		myBoard[row][column + i].setBackground(Color.orange); // makes ship horizontal
 		
+		
+	}
+	private ActionListener addShipToBoard(int row, int column) {
+		for(int y = 0; y < shipSize; y++){
+			if(horizontal.isSelected()){
+				myBoard[row][column + y].setBackground(Color.WHITE);
+			}else{ // vertical
+				myBoard[row + y][column].setBackground(Color.WHITE);
+			}
+		}
+		return null;
 	}
 
 	// public void actionPerformed(ActionEvent e)
