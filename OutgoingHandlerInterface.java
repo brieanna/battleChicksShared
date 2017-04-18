@@ -1,4 +1,4 @@
-package battleChicksShared;
+package BattleChicks;
 
 import java.util.ArrayList;
 import java.util.Arrays;

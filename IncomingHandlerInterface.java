@@ -1,4 +1,4 @@
-package battleChicksShared;
+package BattleChicks;
 
 import org.json.JSONObject;
 
