@@ -152,6 +152,8 @@ public class BattleChicks extends JFrame {
 			}
 		});
 		upperRightPnl.add(startButton);
+		
+		// TODO: add login button: separate login and start buttons
 
 		updateTextArea = new JTextArea(10, 30);
 		updateTextArea.setEditable(false);
@@ -160,6 +162,15 @@ public class BattleChicks extends JFrame {
 
 		JButton resetButton = new JButton();
 		resetButton.setText("RESET");
+		resetButton.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				writer.println(OutgoingHandlerInterface.restart());
+				writer.flush();
+				updateTextArea.setText("Game has been Reset.");
+				// TODO: need to add a GUI reset
+			}	
+		});
 		lowerRightPnl.add(resetButton);
 
 		frame.setVisible(true);
@@ -231,9 +242,11 @@ public class BattleChicks extends JFrame {
 	protected void attackActionPerformed(ActionEvent e) {
 		if (isConnected) {
 			// send missle
-			((JButton) e.getSource()).setBackground(Color.BLACK);
-			((JButton) e.getSource()).setText("X");
-			System.out.println("Enemy board name: " + ((JButton) e.getSource()).getName());
+			JButton myButton = ((JButton) e.getSource());
+			myButton.setBackground(Color.BLACK);
+			myButton.setText("X");
+			OutgoingHandlerInterface.fire(myButton.getText());
+//			System.out.println("Enemy board name: " + myButton.getName());
 		}
 	}
 
@@ -327,8 +340,8 @@ public class BattleChicks extends JFrame {
 		String name = userNameTextArea.getText();
 		if (shipCoordinates.size() == 19 && !name.equals("")) {
 			try {
-//				socket = new Socket(InetAddress.getByName("ec2-52-41-213-54.us-west-2.compute.amazonaws.com"), port);
-				socket = new Socket(InetAddress.getByName("137.190.250.60"), port);
+				socket = new Socket(InetAddress.getByName("ec2-52-41-213-54.us-west-2.compute.amazonaws.com"), port);
+//				socket = new Socket(InetAddress.getByName("137.190.250.60"), port);
 				writer = new PrintWriter(socket.getOutputStream());
 
 				writer.println(OutgoingHandlerInterface.login(name));
@@ -365,6 +378,7 @@ public class BattleChicks extends JFrame {
 				// writer.flush();
 				isConnected = true;
 				updateTextArea.setText("You are now connected!");
+				// TODO: change color of myBoard to blue
 
 			} catch (IOException e) {
 				e.printStackTrace();
