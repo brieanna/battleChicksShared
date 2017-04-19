@@ -17,8 +17,7 @@ public class MessageReader implements Runnable {
 		this.socket = socket;
 		this.gui = gui;
 
-		reader = new BufferedReader(new InputStreamReader(
-				socket.getInputStream()));
+		reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		//reader.readLine();
 	}
 

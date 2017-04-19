@@ -1,25 +1,15 @@
 package BattleChicks;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.util.Scanner;
 
 public class BattleShip 
 {
-	private Socket socket;
-	private PrintWriter writer;
-	private int port = 8989;
-	private BattleShipGUI gui;
-	
 	public BattleShip()
 	{
-		try{
-			socket = new Socket(InetAddress.getByName("ec2-52-41-213-54.us-west-2.compute.amazonaws.com"), port);
-			writer = new PrintWriter(socket.getOutputStream());
+//		try{
+			//socket = new Socket(InetAddress.getByName("ec2-52-41-213-54.us-west-2.compute.amazonaws.com"), port);
+			//writer = new PrintWriter(socket.getOutputStream());
 		
-			writer.println(OutgoingHandlerInterface.login("Kendra"));
-			writer.flush();
+			//writer.println(OutgoingHandlerInterface.login("Kendra"));
+			//writer.flush();
 			
 			//writer.println(OutgoingHandlerInterface.restart());
 			//writer.flush();
@@ -37,8 +27,10 @@ public class BattleShip
 //			writer.println(OutgoingHandlerInterface.whoIs());
 //			writer.flush();
 			
-			gui = new BattleShipGUI();			
-			new Thread(new MessageReader(socket, gui)).start();
+			//gui = new BattleShipGUI();
+			//BattleShipGUI gui = new BattleShipGUI();
+			//gui.showGUI();
+			//new Thread(new MessageReader(socket, gui)).start();
 			
 //			Scanner in = new Scanner(System.in);
 //			String chat = in.nextLine();
@@ -49,10 +41,10 @@ public class BattleShip
 //			writer.println(OutgoingHandlerInterface.fire(spot));
 //			writer.flush();
 
-		} catch (IOException e)
-		{
-			e.printStackTrace();
-		}
+//		} catch (IOException e)
+//		{
+//			e.printStackTrace();
+//		}
 	}
 		
 	public static void main(String[] args) 
