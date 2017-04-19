@@ -35,7 +35,7 @@ public class OutgoingHandlerInterface {
 
 	public static String sendGameBoard(ArrayList<String> gameBoard) {
 		
-		String [] gameboard = (String[]) gameBoard.toArray();
+		Object [] gameboard = gameBoard.toArray();
 		JSONArray ships = new JSONArray(Arrays.asList(gameboard));
 		JSONObject message = new JSONObject();
 		message.put("type", "application");
