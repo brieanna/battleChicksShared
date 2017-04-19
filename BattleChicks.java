@@ -325,9 +325,10 @@ public class BattleChicks extends JFrame {
 
 	public void start() {
 		String name = userNameTextArea.getText();
-		if (shipCoordinates.size() == 19 && name != "") {
+		if (shipCoordinates.size() == 19 && !name.equals("")) {
 			try {
-				socket = new Socket(InetAddress.getByName("ec2-52-41-213-54.us-west-2.compute.amazonaws.com"), port);
+//				socket = new Socket(InetAddress.getByName("ec2-52-41-213-54.us-west-2.compute.amazonaws.com"), port);
+				socket = new Socket(InetAddress.getByName("137.190.250.60"), port);
 				writer = new PrintWriter(socket.getOutputStream());
 
 				writer.println(OutgoingHandlerInterface.login(name));
