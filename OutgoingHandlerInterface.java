@@ -1,4 +1,4 @@
-package battleChicksShared;
+package BattleChicks;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,7 +34,9 @@ public class OutgoingHandlerInterface {
 	}
 
 	public static String sendGameBoard(ArrayList<String> gameBoard) {
-		JSONArray ships = new JSONArray(Arrays.asList(gameBoard));
+		
+		String [] gameboard = (String[]) gameBoard.toArray();
+		JSONArray ships = new JSONArray(Arrays.asList(gameboard));
 		JSONObject message = new JSONObject();
 		message.put("type", "application");
 		JSONObject board = new JSONObject();
