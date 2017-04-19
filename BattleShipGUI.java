@@ -335,7 +335,8 @@ public class BattleShipGUI extends JFrame {
 	public void submitButtonActionPerformed() {
 		String username = userNameLabel.getText();
 		try {
-			socket = new Socket(InetAddress.getByName("ec2-52-41-213-54.us-west-2.compute.amazonaws.com"), port);
+			//socket = new Socket(InetAddress.getByName("ec2-52-41-213-54.us-west-2.compute.amazonaws.com"), port);
+			socket = new Socket(InetAddress.getByName("137.190.250.60"), port);
 			writer = new PrintWriter(socket.getOutputStream());
 			
 			writer.println(OutgoingHandlerInterface.login(username));
@@ -351,9 +352,7 @@ public class BattleShipGUI extends JFrame {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		
-		
+
 	}
 
 }
