@@ -11,22 +11,20 @@ public class MessageReader implements Runnable {
 
 	private Socket socket;
 	private BufferedReader reader;
-//	private GameBoard gb;
+	public BattleChicks battleGUI = new BattleChicks();
 
-	public MessageReader(Socket socket/*, GameBoard gb*/) throws IOException {
+	public MessageReader(Socket socket, BattleChicks battleGUI) throws IOException {
 		this.socket = socket;
-//		this.gb = gb;
-
 		reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		// reader.readLine();
+		this.battleGUI = battleGUI;
 	}
 
 	@Override
 	public void run() {
-
 		while (true) {
 			try {
 				String r = reader.readLine();
+//				battleGUI.recieveChatTextArea.append(r);
 				System.out.println("incoming: " + r);
 				JSONObject message = new JSONObject(r);
 				IncomingHandlerInterface.handle(message);

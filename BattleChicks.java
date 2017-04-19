@@ -19,13 +19,22 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextArea;
 
 public class BattleChicks extends JFrame {
-	private Socket s;
+	private Socket socket;
 	private int port = 8989;
 	private PrintWriter writer;
 	private ArrayList<String> shipCoordinates = new ArrayList<>();
 	private JButton[][] myBoard;
 	private int shipSize = 0;
-	JRadioButton horizontal;
+	private JRadioButton horizontal;
+	public JTextArea recieveChatTextArea;
+	private JTextArea sendChatTextArea;
+	private JTextArea userNameTextArea;
+	private int xlShip;
+	private int lShip;
+	private int mShip;
+	private int sShip;
+	JTextArea updateTextArea;
+	boolean isConnected = false;
 
 	public void runBattleGUI() {
 		JFrame frame = new JFrame();
@@ -43,7 +52,6 @@ public class BattleChicks extends JFrame {
 		enemyBoard.setVisible(true);
 		createEnemyBoard(enemyBoard);
 		mainPanel.add(enemyBoard);
-		
 
 		JPanel upperRightPnl = new JPanel();
 		upperRightPnl.setVisible(true);
@@ -66,10 +74,10 @@ public class BattleChicks extends JFrame {
 		userNameLbl.setText("username: ");
 		upperRightPnl.add(userNameLbl);
 
-		JTextArea userNameTextArea = new JTextArea(3, 20);
+		userNameTextArea = new JTextArea(3, 20);
 		userNameTextArea.setEditable(true);
 		upperRightPnl.add(userNameTextArea);
-		
+
 		horizontal = new JRadioButton("horizontal              ");
 		horizontal.setSelected(true);
 		JRadioButton vertical = new JRadioButton("vertical                  ");
@@ -78,32 +86,32 @@ public class BattleChicks extends JFrame {
 		directionBtnGroup.add(vertical);
 		upperRightPnl.add(horizontal);
 		upperRightPnl.add(vertical);
-		
+
 		JRadioButton xLargeShip = new JRadioButton("XL Ship");
 		xLargeShip.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent e) {		
+			public void actionPerformed(ActionEvent e) {
 				shipSize = 5;
 			}
 		});
 		JRadioButton largeShip = new JRadioButton("L Ship");
 		largeShip.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent e) {		
+			public void actionPerformed(ActionEvent e) {
 				shipSize = 4;
 			}
 		});
 		JRadioButton mediumShip = new JRadioButton("M Ship");
 		mediumShip.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent e) {		
+			public void actionPerformed(ActionEvent e) {
 				shipSize = 3;
 			}
 		});
 		JRadioButton smallShip = new JRadioButton("S Ship");
 		smallShip.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent e) {		
+			public void actionPerformed(ActionEvent e) {
 				shipSize = 2;
 			}
 		});
@@ -117,25 +125,38 @@ public class BattleChicks extends JFrame {
 		upperRightPnl.add(mediumShip);
 		upperRightPnl.add(smallShip);
 
-		JTextArea recieveChatTextArea = new JTextArea(20, 30);
+		recieveChatTextArea = new JTextArea(20, 30);
 		recieveChatTextArea.setEditable(false);
 		upperLeftPnl.add(recieveChatTextArea);
 
-		JTextArea sendChatTextArea = new JTextArea(10, 30);
+		sendChatTextArea = new JTextArea(10, 30);
 		sendChatTextArea.setEditable(true);
 		lowerLeftPnl.add(sendChatTextArea);
 
 		JButton sendButton = new JButton();
 		sendButton.setText("send");
+		sendButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				sendAction();
+			}
+		});
 		lowerLeftPnl.add(sendButton);
 
 		JButton startButton = new JButton();
 		startButton.setText("START");
+		startButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				start();
+			}
+		});
 		upperRightPnl.add(startButton);
 
-		JLabel updateLbl = new JLabel();
-		updateLbl.setText("Place ships then press START");
-		lowerRightPnl.add(updateLbl);
+		updateTextArea = new JTextArea(10, 30);
+		updateTextArea.setEditable(false);
+		updateTextArea.setText("Place ships then press START");
+		lowerRightPnl.add(updateTextArea);
 
 		JButton resetButton = new JButton();
 		resetButton.setText("RESET");
@@ -144,14 +165,19 @@ public class BattleChicks extends JFrame {
 		frame.setVisible(true);
 	}
 
-	
+	protected void sendAction() {
+		if (isConnected) {
+			String sendTxt = sendChatTextArea.getText();
+			sendChatTextArea.setText("");
+			recieveChatTextArea.append(sendTxt + "\n");
+			writer.println(OutgoingHandlerInterface.sendChat(sendTxt));
+			writer.flush();
+		} else {
+			recieveChatTextArea.append("Message not sent because you are not connected \n");
+		}
+	}
 
-	private JButton[][] gameBoard = new JButton[10][10]; // Declared much
-															// earlier in the
-															// program, right
-															// after the class
-															// declaration.
-	// private JPanel panelc = new JPanel();
+	private JButton[][] gameBoard = new JButton[10][10];
 
 	public JButton[][] createMyBoard(JPanel panelc) {
 		panelc.setLayout(new GridLayout(10, 10));
@@ -167,7 +193,7 @@ public class BattleChicks extends JFrame {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						
+
 						addShipActionPerformed(e);
 					}
 				});
@@ -192,7 +218,7 @@ public class BattleChicks extends JFrame {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						
+
 						attackActionPerformed(e);
 					}
 				});
@@ -203,107 +229,148 @@ public class BattleChicks extends JFrame {
 	}
 
 	protected void attackActionPerformed(ActionEvent e) {
-		// send missle
-		((JButton) e.getSource()).setBackground(Color.BLACK);
-		((JButton) e.getSource()).setText("X");
-		System.out.println("Enemy board name: " + ((JButton) e.getSource()).getName());
+		if (isConnected) {
+			// send missle
+			((JButton) e.getSource()).setBackground(Color.BLACK);
+			((JButton) e.getSource()).setText("X");
+			System.out.println("Enemy board name: " + ((JButton) e.getSource()).getName());
+		}
 	}
 
 	protected void addShipActionPerformed(ActionEvent e) {
-		char[] letters = {'A', 'B', 'C', 'D', 'E', 'F','G', 'H', 'I', 'J'};
-		char[] numbers = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
-		int row = 0;
-		int column = 0;
-		
-		String coordinate = ((JButton) e.getSource()).getText();
-		shipCoordinates.add(coordinate);
-		System.out.println(coordinate);
-		
-		char[] coords = coordinate.toCharArray();
-		Character[] Coo = {coords[0], coords[1]};
-		
-	
-		for (int x = 0; x < 10; x++) {
-			if (Coo[0].equals(letters[x])) {
-				row = x;
-			} else {
-				System.out.print("row else " + x + " ,");
+		if (isConnected) {
+			// does nothing
+		} else {
+			char[] letters = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J' };
+			char[] numbers = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+			int row = 0;
+			int column = 0;
+
+			String coordinate = ((JButton) e.getSource()).getText();
+
+			char[] coords = coordinate.toCharArray();
+			Character[] Coo = { coords[0], coords[1] };
+
+			for (int x = 0; x < 10; x++) {
+				if (Coo[0].equals(letters[x])) {
+					row = x;
+				} else {
+				}
+
+				if (Coo[1].equals(numbers[x])) {
+					column = x;
+				} else {
+				}
 			}
-			
-			if (Coo[1].equals(numbers[x])){
-				column = x;
-			}else{
-				System.out.print("column else " + x + " ,");
+			switch (shipSize) {
+			case 2:
+				if (sShip < 2) {
+					sShip++;
+					addShipToBoard(row, column);
+				} else {
+					updateTextArea.setText(
+							"All small ships placed. \n Place all ships, \n enter username, \n and press start to play.");
+				}
+				break;
+			case 3:
+				if (mShip < 2) {
+					mShip++;
+					addShipToBoard(row, column);
+				} else {
+					updateTextArea.setText(
+							"All medium ships placed. \nPlace all ships, \n enter username, \n and press start to play.");
+				}
+				break;
+			case 4:
+				if (lShip < 1) {
+					lShip++;
+					addShipToBoard(row, column);
+				} else {
+					updateTextArea.setText(
+							"All large ships placed. \n Place all ships, \n enter username, \n and press start to play.");
+				}
+				break;
+			case 5:
+				if (xlShip < 1) {
+					xlShip++;
+					addShipToBoard(row, column);
+				} else {
+					updateTextArea.setText(
+							"All extra large ships placed. \n Place all ships, \n enter username, \n and press start to play.");
+				}
+				break;
+			default:
+				updateTextArea.setText(
+						"Select ship size and orientation to place ships.\n Place all ships, \n enter username, \n and press start to play.");
+				break;
+
 			}
 		}
-		addShipToBoard(row, column);
-//		int i = 3; // size 4 ship   need for loop to change color and send coordinate to arrayList (skips the middle right now)
-//		myBoard[row][column].setBackground(Color.ORANGE);	
-////		myBoard[row + 1][column].setBackground(Color.ORANGE); // makes ship vertical
-//		myBoard[row][column + i].setBackground(Color.orange); // makes ship horizontal
-		
-		
+
 	}
-	private ActionListener addShipToBoard(int row, int column) {
-		for(int y = 0; y < shipSize; y++){
-			if(horizontal.isSelected()){
+
+	private void addShipToBoard(int row, int column) {
+		for (int y = 0; y < shipSize; y++) {
+			if (horizontal.isSelected()) {
 				myBoard[row][column + y].setBackground(Color.WHITE);
-			}else{ // vertical
+				String coordinate = myBoard[row][column + y].getText();
+				shipCoordinates.add(coordinate);
+			} else { // vertical
 				myBoard[row + y][column].setBackground(Color.WHITE);
+				String coordinate = myBoard[row + y][column].getText();
+				shipCoordinates.add(coordinate);
 			}
 		}
-		return null;
 	}
 
-	// public void actionPerformed(ActionEvent e)
-	// {
-	// //Some code to change a specific button
-	// ((JButton)e.getSource()).setText("to what you want");
-	// //In the actionlistener e.getSource() will return the button you clicked
-	// }
-	public void Start() {
-		try {
-			s = new Socket(InetAddress.getByName("ec2-52-41-213-54.us-west-2.compute.amazonaws.com"), port);
-			writer = new PrintWriter(s.getOutputStream());
+	public void start() {
+		String name = userNameTextArea.getText();
+		if (shipCoordinates.size() == 19 && name != "") {
+			try {
+				socket = new Socket(InetAddress.getByName("ec2-52-41-213-54.us-west-2.compute.amazonaws.com"), port);
+				writer = new PrintWriter(socket.getOutputStream());
 
-			writer.println(OutgoingHandlerInterface.login("Brie1"));
-			writer.flush();
+				writer.println(OutgoingHandlerInterface.login(name));
+				writer.flush();
 
-			// writer.println(OutgoingHandlerInterface.restart());
-			// writer.flush();
+				writer.println(OutgoingHandlerInterface.sendGameBoard(shipCoordinates));
+				writer.flush();
+				// writer.println(OutgoingHandlerInterface.restart());
+				// writer.flush();
 
-			// String [] array = {"A1", "B1", "C1", "A6", "B6", "C6", "A5",
-			// "B5", "C5", "A4", "B4", "C4", "A3", "B3", "C3", "A2", "B2", "C2",
-			// "A7"};
-			// writer.println(OutgoingHandlerInterface.sendGameBoard(array));
-			// writer.flush();
+				// writer.println(OutgoingHandlerInterface.fire("A1"));
+				// writer.flush();
 
-			// writer.println(OutgoingHandlerInterface.fire("A1"));
-			// writer.flush();
+				// writer.println(OutgoingHandlerInterface.whoIs());
+				// writer.flush();
 
-			// writer.println(OutgoingHandlerInterface.whoIs());
-			// writer.flush();
+				// writer.println(OutgoingHandlerInterface.sendChat("late night
+				// coding!"));
+				// writer.flush();
+				//
 
-			// writer.println(OutgoingHandlerInterface.sendChat("late night
-			// coding!"));
-			// writer.flush();
-			//
+				// gb = new GameBoard();
+				BattleChicks bc = new BattleChicks();
 
-			// gb = new GameBoard();
+				new Thread(new MessageReader(socket, bc/* , gb */)).start();
 
-			new Thread(new MessageReader(s/* , gb */)).start();
+				// Scanner in = new Scanner(System.in);
+				// String spot = in.nextLine();
+				// writer.println(OutgoingHandlerInterface.fire(spot));
+				// writer.flush();
+				//
+				// String chat = in.nextLine();
+				// writer.println(OutgoingHandlerInterface.sendChat(chat));
+				// writer.flush();
+				isConnected = true;
+				updateTextArea.setText("You are now connected!");
 
-			// Scanner in = new Scanner(System.in);
-			// String spot = in.nextLine();
-			// writer.println(OutgoingHandlerInterface.fire(spot));
-			// writer.flush();
-			//
-			// String chat = in.nextLine();
-			// writer.println(OutgoingHandlerInterface.sendChat(chat));
-			// writer.flush();
-
-		} catch (IOException e) {
-			e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} else {
+			updateTextArea.setText(
+					"Not all information ready to play. \n Place all ships, \n enter username, \n and press start to play.");
 		}
 	}
 
