@@ -1,60 +1,71 @@
-package BattleChicks;
-
+package battleChicksShared;
 
 import org.json.JSONObject;
 
 public class IncomingHandlerInterface {
-static boolean turn; 
- static boolean reset;
- static boolean hit;
- static String win;
- static BattleShipGUI gui = new BattleShipGUI();
 
-	public static void handle(JSONObject message){
+	static boolean turn;
+	static boolean reset;
+	static boolean hit;
+	static String win;
+	// static BattleChicks gui = new BattleChicks();
+	static JSONObject myObject;
+
+	public static void handle(JSONObject message) {
+		myObject = message;
+
 		String type = message.optString("type");
-		switch (type){
+		switch (type) {
 		case "login":
 			System.out.println(type);
 			break;
+
 		case "application":
-			// getting true or false for turn
 			JSONObject mess = message.optJSONObject("message");
 			applicationHandler(mess);
-//			turn = mess.optBoolean("turn");
-//			System.out.println(type + "> " + turn);
 			break;
+
 		case "acknowledge":
 			String ackMessage = message.optString("message");
-			gui.updateTextArea(ackMessage);
+			BattleChicks.updateTextArea(ackMessage);
 			System.out.println(type + "> " + ackMessage);
 			break;
+
 		case "chat":
 			String chat = message.optString("message");
 			String name = message.optString("fromUser");
 			String send = name + ": " + chat;
-			gui.getChatMessage(send);
+			BattleChicks.setChatMessage(send);
 			System.out.println(type + "> " + chat);
 			break;
+
 		case "error":
 			String error = message.optString("message");
-			gui.updateTextArea(error);
+			BattleChicks.updateTextArea(error);
 			System.out.println(type + "> " + error);
 			break;
-//		case "message":
-//			System.out.println(type);
-//			break;
-		}	
-	}	
-	
-	public static void applicationHandler(JSONObject mess){
-		
-		//String message = mess;
-		turn = mess.optBoolean("turn");
-		reset = mess.optBoolean("reset");
-		hit = mess.optBoolean("hit");
-		win = mess.optString("win");
-		
-		
-		
+		}
+	}
+
+	public static void applicationHandler(JSONObject mess) {
+		if (mess.has("turn")) {
+			turn = mess.optBoolean("turn");
+			BattleChicks.setTurn(turn);
+		}
+		else if (mess.has("hit")) {
+			hit = mess.optBoolean("hit");
+			String coordinate = mess.optString("coordinate");
+			BattleChicks.hitMiss(hit, coordinate);
+		}
+		else if (mess.has("win")) {
+			win = mess.optString("win");
+			BattleChicks.setTurn(false);
+			BattleChicks.updateTextArea(win + ": WINS!");
+			BattleChicks.setChatMessage(win + ": WINS!");
+		}
+		else if (mess.has("reset")) {
+			reset = mess.optBoolean("reset");
+			BattleChicks.updateTextArea("Game has ended please reset board.");
+		}
 	}
 }
