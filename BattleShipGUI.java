@@ -31,9 +31,9 @@ public class BattleShipGUI extends JFrame {
 	private static JPanel mainPanel, headPanel, chatPanel, textPanel, opponentPanel, myGridPanel, instructionPanel,
 			sendPanel, onePanel, twoPanel, threePanel, fourPanel, fivePanel, sixPanel, usernamePanel,
 			shipPanel, winLosePanel;
-	private static JLabel headLabel, userNameLabel, winLoseLabel;
+	private static JLabel headLabel, userNameLabel;
 	private static JTextField userNameTextField;
-	private static JTextArea chatTextArea, textTextArea, instructionTextArea;
+	private static JTextArea chatTextArea, textTextArea, instructionTextArea, winLoseTextArea;
 	private static JScrollPane chatScrollPane, textScrollPane;
 	public JButton[][] gridButtons = new JButton[10][10];
 	public JButton[][] myBoard;
@@ -139,9 +139,9 @@ public class BattleShipGUI extends JFrame {
 
 		winLosePanel = new JPanel();
 		winLosePanel.setVisible(true);
-		winLoseLabel = new JLabel("Win/lose message will go here.", SwingConstants.CENTER);
-		winLoseLabel.setFont(winLoseLabel.getFont().deriveFont(26.0f));
-		winLosePanel.add(winLoseLabel);
+		winLoseTextArea = new JTextArea(20,40);
+		winLoseTextArea.setEditable(false);
+		winLosePanel.add(winLoseTextArea);
 		headPanel.add(winLosePanel);
 		twoPanel.add(headPanel);
 
@@ -162,6 +162,8 @@ public class BattleShipGUI extends JFrame {
 		chatTextArea = new JTextArea(20, 40);
 		chatTextArea.setLineWrap(true);
 		chatTextArea.setEditable(false);
+		
+		
 		chatScrollPane = new JScrollPane(chatTextArea);
 		chatScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		chatPanel.add(chatScrollPane);
@@ -346,10 +348,12 @@ public class BattleShipGUI extends JFrame {
 
 	public void sendButtonActionPerformed() {
 		String chat = textTextArea.getText();
+		String username = userNameTextField.getText();
 		writer.println(OutgoingHandlerInterface.sendChat(chat));
 		writer.flush();
 
-		chatTextArea.append("\n" + chat);
+		chatTextArea.append(username + ": " + chat + "\n");
+		textTextArea.setText("");
 	}
 
 	public void startButtonActionPerformed() {
@@ -398,5 +402,20 @@ public class BattleShipGUI extends JFrame {
 		writer.flush();
 		
 	}
+	
+	public void getChatMessage(String send){
+		chatTextArea.append(send + "\n");
+	}
+	
+	public void updateTextArea(String update){
+		winLoseTextArea.setText(update + "\n");
+		//win lose message
+		//ack login
+		//turn
+		//reset game
+		//hit or miss
+		
+	}
+		
 
 }
