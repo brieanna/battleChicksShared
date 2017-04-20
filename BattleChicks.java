@@ -16,31 +16,38 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
 
 public class BattleChicks extends JFrame {
+	/**
+	 * created by Brie
+	 */
+	private static final long serialVersionUID = -3132123028681415218L;
 	private Socket socket;
 	private int port = 8989;
 	private PrintWriter writer;
 	private ArrayList<String> shipCoordinates = new ArrayList<>();
-	private JButton[][] myBoard;
+	private static JButton[][] myBoard;
+	private static JButton[][] enemyGameBoard;
 	private int shipSize = 0;
 	private JRadioButton horizontal;
-	public JTextArea receiveChatTextArea;
+	public static JTextArea receiveChatTextArea;
 	private JTextArea sendChatTextArea;
 	private JTextArea userNameTextArea;
 	private int xlShip;
 	private int lShip;
 	private int mShip;
 	private int sShip;
-	JTextArea updateTextArea;
+	public static JTextArea updateTextArea;
 	boolean isConnected = false;
-	boolean turn = false;
+	static boolean turn = false;
 	
-	char[] letters = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J' };
-	char[] numbers = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-	int row = 0;
-	int column = 0;
+	static char[] letters = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J' };
+	static char[] numbers = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+	static int row = 0;
+	static int column = 0;
 
 	public void runBattleGUI() {
 		JFrame frame = new JFrame();
@@ -56,7 +63,7 @@ public class BattleChicks extends JFrame {
 
 		JPanel enemyBoard = new JPanel(new GridLayout(10, 10));
 		enemyBoard.setVisible(true);
-		createEnemyBoard(enemyBoard);
+		enemyGameBoard = createEnemyBoard(enemyBoard);
 		mainPanel.add(enemyBoard);
 
 		JPanel upperRightPnl = new JPanel();
@@ -139,13 +146,19 @@ public class BattleChicks extends JFrame {
 		upperRightPnl.add(largeShip);
 		upperRightPnl.add(mediumShip);
 		upperRightPnl.add(smallShip);
-
-		receiveChatTextArea = new JTextArea(20, 30);
+		
+		receiveChatTextArea = new JTextArea(19, 29);
 		receiveChatTextArea.setEditable(false);
-		upperLeftPnl.add(receiveChatTextArea);
+		JScrollPane chatScrollPane = new JScrollPane(receiveChatTextArea);
+		chatScrollPane.setSize(20,30);
+		chatScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		chatScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		receiveChatTextArea.setLineWrap(true);
+		upperLeftPnl.add(chatScrollPane);
 
 		sendChatTextArea = new JTextArea(10, 30);
 		sendChatTextArea.setEditable(true);
+		sendChatTextArea.setLineWrap(true);
 		lowerLeftPnl.add(sendChatTextArea);
 
 		JButton sendButton = new JButton();
@@ -172,6 +185,7 @@ public class BattleChicks extends JFrame {
 
 		updateTextArea = new JTextArea(10, 30);
 		updateTextArea.setEditable(false);
+		updateTextArea.setLineWrap(true);
 		updateTextArea.setText("Place ships then press START");
 		lowerRightPnl.add(updateTextArea);
 
@@ -241,18 +255,20 @@ public class BattleChicks extends JFrame {
 		return gameBoard;
 	}
 
-	public void createEnemyBoard(JPanel panelc) {
+	private JButton[][] gameBoard2 = new JButton[10][10];
+	
+	public JButton[][] createEnemyBoard(JPanel panelc) {
 		panelc.setLayout(new GridLayout(10, 10));
 		char letter = 'A';
 		for (int row = 0; row < 10; row++) {
 			for (int column = 0; column < 10; column++) {
-				gameBoard[row][column] = new JButton("" + letter + column);
-				gameBoard[row][column].setName("" + letter + column);
-				// gameBoard[row][column].setBorder(null);
-				gameBoard[row][column].setOpaque(true);
-				gameBoard[row][column].setBackground(Color.lightGray);
-				gameBoard[row][column].setForeground(Color.GRAY);
-				gameBoard[row][column].addActionListener(new ActionListener() {
+				gameBoard2[row][column] = new JButton("" + letter + column);
+				gameBoard2[row][column].setName("" + letter + column);
+				// gameBoard2[row][column].setBorder(null);
+				gameBoard2[row][column].setOpaque(true);
+				gameBoard2[row][column].setBackground(Color.lightGray);
+				gameBoard2[row][column].setForeground(Color.GRAY);
+				gameBoard2[row][column].addActionListener(new ActionListener() {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
@@ -263,10 +279,11 @@ public class BattleChicks extends JFrame {
 						}
 					}
 				});
-				panelc.add(gameBoard[row][column]);
+				panelc.add(gameBoard2[row][column]);
 			}
 			letter++;
 		}
+		return gameBoard2;
 	}
 
 	protected void attackActionPerformed(ActionEvent e) {
@@ -282,18 +299,18 @@ public class BattleChicks extends JFrame {
 		}
 	}
 
-	public void findCoordinates(String coordinate) {
+	public static void findCoordinates(String coordinate) {
 		char[] coords = coordinate.toCharArray();
 		Character[] Coo = { coords[0], coords[1] };
 
 		for (int x = 0; x < 10; x++) {
-			if (Coo[0].equals(this.letters[x])) {
-				this.row = x;
+			if (Coo[0].equals(letters[x])) {
+				row = x;
 			} else {
 			}
 
-			if (Coo[1].equals(this.numbers[x])) {
-				this.column = x;
+			if (Coo[1].equals(numbers[x])) {
+				column = x;
 			} else {
 			}
 		}
@@ -411,23 +428,53 @@ public class BattleChicks extends JFrame {
 		}
 	}
 
-	public void getChatMessage(String send) {
+	public static void setChatMessage(String send) {
 		receiveChatTextArea.append(send + "\n");
 	}
 
-	public void updateTextArea(String update) {
+	public static void updateTextArea(String update) {
 		updateTextArea.setText(update + "\n");
 		// win lose message
 		// ack login
 		// turn
 		// reset game
 		// hit or miss
-
 	}
-
-	public static void main(String[] args) {
-		BattleChicks bc = new BattleChicks();
-		bc.runBattleGUI();
-		// bc.Start();
+	public static void setTurn(Boolean myTurn){
+		turn = myTurn;
+		if(turn){
+			updateTextArea.setText("Your Turn");
+		}else{
+			updateTextArea.setText("NOT your turn");
+		}
+	}
+	
+	public static void hitMiss(Boolean hit, String coordinate){
+		findCoordinates(coordinate);
+		if(turn && hit){
+			updateTextArea.append("   HIT");
+			enemyGameBoard[row][column].setBackground(Color.RED);
+			enemyGameBoard[row][column].setText("X");
+			enemyGameBoard[row][column].setForeground(Color.RED);
+		}
+		else if(turn && !hit){
+			updateTextArea.append("   HIT");
+			enemyGameBoard[row][column].setBackground(Color.BLACK);
+			enemyGameBoard[row][column].setText("O");
+			enemyGameBoard[row][column].setForeground(Color.BLACK);
+		}
+		else if(!turn && hit){
+			updateTextArea.append("   MISS");
+			myBoard[row][column].setBackground(Color.RED);
+			myBoard[row][column].setText("X");
+			myBoard[row][column].setForeground(Color.RED);
+		}
+		else if(!turn && !hit){
+			updateTextArea.append("   MISS");
+			myBoard[row][column].setBackground(Color.BLACK);
+			myBoard[row][column].setText("O");
+			myBoard[row][column].setForeground(Color.BLACK);
+		}
+		
 	}
 }
