@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import javax.swing.ButtonGroup;
@@ -30,21 +29,22 @@ public class BattleShipGUI extends JFrame {
 	private PrintWriter writer;
 	private static JFrame frame;
 	private static JPanel mainPanel, headPanel, chatPanel, textPanel, opponentPanel, myGridPanel, instructionPanel,
-			sendPanel, submitPanel, onePanel, twoPanel, threePanel, fourPanel, fivePanel, sixPanel, usernamePanel,
+			sendPanel, onePanel, twoPanel, threePanel, fourPanel, fivePanel, sixPanel, usernamePanel,
 			shipPanel, winLosePanel;
-	private static JLabel headLabel, userNameLabel, winLoseLabel, shipLabel, shipHeadLabel;
+	private static JLabel headLabel, userNameLabel, winLoseLabel;
 	private static JTextField userNameTextField;
 	private static JTextArea chatTextArea, textTextArea, instructionTextArea;
 	private static JScrollPane chatScrollPane, textScrollPane;
 	public JButton[][] gridButtons = new JButton[10][10];
 	public JButton[][] myBoard;
 	public static JRadioButton verticalRadio, horizontalRadio;
-	private static JButton sendButton, submitButton;
+	private static JButton sendButton, startButton, resetButton, loginButton;
 	private static String instructions = "Instructions\nEnter your username.\nPlace all five ships on your grid "
 			+ "and hit the submit button.\nThe ships will be placed in the order listed below. Select horizontal"
-			+ "or verticalt to change the direction they are being placed.\n\n"
+			+ " or vertical to change the direction they are being placed.\n\n"
 			+ "Your username will be added and you will be connected to the game.\n"
-			+ "In order to make a hit, press the appropriate button on your opponents grid.";
+			+ "In order to make a hit, press the appropriate button on your opponents grid.\n"
+			+ "2 - Two Square  2 - Three Square  1 - Four Square  1 - Five Square";
 	private static ArrayList<String> battleshipButtons = new ArrayList<String>();
 	private static ButtonGroup group;
 	public int countShips = 1;
@@ -64,7 +64,7 @@ public class BattleShipGUI extends JFrame {
 		frame.add(mainPanel);
 
 		// instruction Panel
-		onePanel = new JPanel(new GridLayout(3, 1));
+		onePanel = new JPanel(new GridLayout(2, 1));
 		onePanel.setVisible(true);
 		instructionPanel = new JPanel();
 		instructionPanel.setVisible(true);
@@ -73,33 +73,43 @@ public class BattleShipGUI extends JFrame {
 		instructionTextArea.setLineWrap(true);
 		instructionTextArea.setEditable(false);
 		instructionPanel.add(instructionTextArea);
-		shipPanel = new JPanel(new GridLayout(4, 1));
-		shipHeadLabel = new JLabel("Ships", SwingConstants.CENTER);
-		shipHeadLabel.setBorder(new EmptyBorder(10, 10, 10, 10));
-		shipPanel.add(shipHeadLabel);
+		shipPanel = new JPanel(new GridLayout(3,1));
+		//shipHeadLabel = new JLabel("Ships", SwingConstants.CENTER);
+		//shipHeadLabel.setBorder(new EmptyBorder(10, 10, 10, 10));
+		//shipPanel.add(shipHeadLabel);
+		//shipLabel = new JLabel("2 - Two Square  2 - Three Square  1 - Four Square  1 - Five Square");
+		//shipLabel.setSize(500, 50);
+		//shipPanel.add(shipLabel);
 		group = new ButtonGroup();
 		verticalRadio = new JRadioButton("Vertical Ship", true);
-		verticalRadio.setBorder(new EmptyBorder(10, 150, 10, 20));
+		verticalRadio.setBorder(new EmptyBorder(10, 100, 10, 10));
 		horizontalRadio = new JRadioButton("Horizontal Ship", false);
-		horizontalRadio.setBorder(new EmptyBorder(10, 150, 10, 20));
+		horizontalRadio.setBorder(new EmptyBorder(10, 10, 10, 50));
 		group.add(verticalRadio);
 		group.add(horizontalRadio);
 		shipPanel.add(verticalRadio);
 		shipPanel.add(horizontalRadio);
-		shipLabel = new JLabel("2 - Two Square  2 - Three Square  1 - Four Square  1 - Five Square", SwingConstants.CENTER);
-		shipPanel.add(shipLabel);
-		submitPanel = new JPanel();
-		submitPanel.setVisible(true);
-		submitButton = new JButton("Submit");
-		submitButton.addActionListener(new ActionListener() {
+		//submitPanel = new JPanel();
+		//submitPanel.setVisible(true);
+		startButton = new JButton("Start");
+		startButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				submitButtonActionPerformed();
+				startButtonActionPerformed();
 			}
 		});
-		submitPanel.add(submitButton);
+		resetButton = new JButton("Reset");
+		resetButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				resetButtonActionPerformed();
+			}
+		});
+		shipPanel.add(startButton);
+		shipPanel.add(resetButton);
+		//submitPanel.add(submitButton);
+		//submitPanel.add(resetButton);
 		onePanel.add(instructionPanel);
 		onePanel.add(shipPanel);
-		onePanel.add(submitPanel);
+		//onePanel.add(submitPanel);
 
 		// header Panel
 		twoPanel = new JPanel(new GridLayout(1, 1));
@@ -118,6 +128,13 @@ public class BattleShipGUI extends JFrame {
 		usernamePanel.add(userNameLabel);
 		userNameTextField = new JTextField(25);
 		usernamePanel.add(userNameTextField);
+		loginButton = new JButton("Login");
+		loginButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				loginButtonActionPerformed();
+			}
+		});
+		usernamePanel.add(loginButton);
 		headPanel.add(usernamePanel);
 
 		winLosePanel = new JPanel();
@@ -236,9 +253,12 @@ public class BattleShipGUI extends JFrame {
 	}
 
 	public void opponentButtonActionPerformed(ActionEvent e) {
-		((JButton) e.getSource()).setBackground(Color.MAGENTA);
+		((JButton) e.getSource()).setBackground(Color.RED);
 		String clickedButton = ((JButton) e.getSource()).getText();
 		System.out.println(clickedButton);
+		
+		writer.println(OutgoingHandlerInterface.fire(clickedButton));
+		writer.flush();
 	}
 
 	public void myButtonActionPerformed(ActionEvent e) {
@@ -332,27 +352,51 @@ public class BattleShipGUI extends JFrame {
 		chatTextArea.append("\n" + chat);
 	}
 
-	public void submitButtonActionPerformed() {
-		String username = userNameLabel.getText();
+	public void startButtonActionPerformed() {
+		//String username = userNameTextField.getText();
+//		try {
+//			socket = new Socket(InetAddress.getByName("ec2-52-41-213-54.us-west-2.compute.amazonaws.com"), port);
+//			//socket = new Socket(InetAddress.getByName("137.190.250.60"), port);
+//			writer = new PrintWriter(socket.getOutputStream());
+//			
+//			writer.println(OutgoingHandlerInterface.login(username));
+//			writer.flush();
+			
+			writer.println(OutgoingHandlerInterface.sendGameBoard(battleshipButtons));
+			writer.flush();
+			
+//			BattleShipGUI gui = new BattleShipGUI();
+//			new Thread(new MessageReader(socket, gui)).start();
+//			
+//			
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+	}
+	
+	public void loginButtonActionPerformed(){
+		String username = userNameTextField.getText();
 		try {
-			//socket = new Socket(InetAddress.getByName("ec2-52-41-213-54.us-west-2.compute.amazonaws.com"), port);
-			socket = new Socket(InetAddress.getByName("137.190.250.60"), port);
+			socket = new Socket(InetAddress.getByName("ec2-52-41-213-54.us-west-2.compute.amazonaws.com"), port);
+			//socket = new Socket(InetAddress.getByName("137.190.250.60"), port);
 			writer = new PrintWriter(socket.getOutputStream());
 			
 			writer.println(OutgoingHandlerInterface.login(username));
 			writer.flush();
 			
-			writer.println(OutgoingHandlerInterface.sendGameBoard(battleshipButtons));
-			writer.flush();
-			
 			BattleShipGUI gui = new BattleShipGUI();
 			new Thread(new MessageReader(socket, gui)).start();
-			
-			
+						
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
+		
+	}
+	
+	private void resetButtonActionPerformed() {
+		writer.println(OutgoingHandlerInterface.restart());
+		writer.flush();
+		
 	}
 
 }
