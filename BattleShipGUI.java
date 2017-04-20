@@ -3,6 +3,7 @@ package BattleChicks;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -31,14 +32,15 @@ public class BattleShipGUI extends JFrame {
 	private static JPanel mainPanel, headPanel, chatPanel, textPanel, opponentPanel, myGridPanel, instructionPanel,
 			sendPanel, onePanel, twoPanel, threePanel, fourPanel, fivePanel, sixPanel, usernamePanel,
 			shipPanel, winLosePanel;
-	private static JLabel headLabel, userNameLabel;
+	private static JLabel headLabel, userNameLabel, label;
 	private static JTextField userNameTextField;
 	private static JTextArea chatTextArea, textTextArea, instructionTextArea, winLoseTextArea;
 	private static JScrollPane chatScrollPane, textScrollPane;
 	public JButton[][] gridButtons = new JButton[10][10];
+	public JButton[][] grid2Buttons = new JButton[10][10];
 	public JButton[][] myBoard;
 	public static JRadioButton verticalRadio, horizontalRadio;
-	private static JButton sendButton, startButton, resetButton, loginButton;
+	private static JButton sendButton, startButton, resetButton, loginButton, restartButton;
 	private static String instructions = "Instructions\nEnter your username.\nPlace all five ships on your grid "
 			+ "and hit the submit button.\nThe ships will be placed in the order listed below. Select horizontal"
 			+ " or vertical to change the direction they are being placed.\n\n"
@@ -73,43 +75,41 @@ public class BattleShipGUI extends JFrame {
 		instructionTextArea.setLineWrap(true);
 		instructionTextArea.setEditable(false);
 		instructionPanel.add(instructionTextArea);
-		shipPanel = new JPanel(new GridLayout(3,1));
-		//shipHeadLabel = new JLabel("Ships", SwingConstants.CENTER);
-		//shipHeadLabel.setBorder(new EmptyBorder(10, 10, 10, 10));
-		//shipPanel.add(shipHeadLabel);
-		//shipLabel = new JLabel("2 - Two Square  2 - Three Square  1 - Four Square  1 - Five Square");
-		//shipLabel.setSize(500, 50);
-		//shipPanel.add(shipLabel);
+		shipPanel = new JPanel(new GridLayout(2,3));
 		group = new ButtonGroup();
 		verticalRadio = new JRadioButton("Vertical Ship", true);
-		verticalRadio.setBorder(new EmptyBorder(10, 100, 10, 10));
+		verticalRadio.setBorder(new EmptyBorder(10, 50, 10, 0));
+		label = new JLabel("");
 		horizontalRadio = new JRadioButton("Horizontal Ship", false);
-		horizontalRadio.setBorder(new EmptyBorder(10, 10, 10, 50));
+		horizontalRadio.setBorder(new EmptyBorder(10, 0, 10, 50));
 		group.add(verticalRadio);
 		group.add(horizontalRadio);
 		shipPanel.add(verticalRadio);
+		shipPanel.add(label);
 		shipPanel.add(horizontalRadio);
-		//submitPanel = new JPanel();
-		//submitPanel.setVisible(true);
 		startButton = new JButton("Start");
 		startButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				startButtonActionPerformed();
 			}
 		});
-		resetButton = new JButton("Reset");
+		resetButton = new JButton("Reset Boards");
 		resetButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				resetButtonActionPerformed();
 			}
 		});
+		restartButton = new JButton("Restart Game");
+		restartButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				restartButtonActionPerformed();
+			}
+		});
 		shipPanel.add(startButton);
+		shipPanel.add(restartButton);
 		shipPanel.add(resetButton);
-		//submitPanel.add(submitButton);
-		//submitPanel.add(resetButton);
 		onePanel.add(instructionPanel);
 		onePanel.add(shipPanel);
-		//onePanel.add(submitPanel);
 
 		// header Panel
 		twoPanel = new JPanel(new GridLayout(1, 1));
@@ -219,19 +219,29 @@ public class BattleShipGUI extends JFrame {
 		frame.setVisible(true);
 	}
 
-	public void buildOpponentBoard(JPanel panel) {
+	public JButton[][] buildOpponentBoard(JPanel panel) {
 		for (int r = 0; r < 10; r++) {
 			for (int c = 0; c < 10; c++) {
 				String[] letters = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" };
-				gridButtons[r][c] = new JButton("" + letters[r] + c);
-				gridButtons[r][c].setPreferredSize(new Dimension(15, 15));
-				gridButtons[r][c].addActionListener(new ActionListener() {
+				grid2Buttons[r][c] = new JButton("" + letters[r] + c);
+				grid2Buttons[r][c].setPreferredSize(new Dimension(15, 15));
+				grid2Buttons[r][c].addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						opponentButtonActionPerformed(e);
 					}
 				});
-				gridButtons[r][c].setBackground(Color.GRAY);
-				panel.add(gridButtons[r][c]);
+				grid2Buttons[r][c].setBackground(Color.GRAY);
+				panel.add(grid2Buttons[r][c]);
+			}
+		}
+		return grid2Buttons;
+	}
+	
+	public void clearOpponentBoard(JButton[][] grid2Buttons)
+	{
+		for(int r = 0; r < 10; r++){
+			for(int c = 0; c < 10; c++){
+				grid2Buttons[r][c].setBackground(Color.GRAY);
 			}
 		}
 	}
@@ -253,9 +263,18 @@ public class BattleShipGUI extends JFrame {
 		}
 		return gridButtons;
 	}
+	
+	public void clearMyBoard(JButton[][] gridButtons)
+	{
+		for(int r = 0; r < 10; r++){
+			for(int c = 0; c < 10; c++){
+				gridButtons[r][c].setBackground(Color.GRAY);
+			}
+		}
+	}
 
 	public void opponentButtonActionPerformed(ActionEvent e) {
-		((JButton) e.getSource()).setBackground(Color.RED);
+		((JButton) e.getSource()).setBackground(Color.MAGENTA);
 		String clickedButton = ((JButton) e.getSource()).getText();
 		System.out.println(clickedButton);
 		
@@ -357,25 +376,8 @@ public class BattleShipGUI extends JFrame {
 	}
 
 	public void startButtonActionPerformed() {
-		//String username = userNameTextField.getText();
-//		try {
-//			socket = new Socket(InetAddress.getByName("ec2-52-41-213-54.us-west-2.compute.amazonaws.com"), port);
-//			//socket = new Socket(InetAddress.getByName("137.190.250.60"), port);
-//			writer = new PrintWriter(socket.getOutputStream());
-//			
-//			writer.println(OutgoingHandlerInterface.login(username));
-//			writer.flush();
-			
 			writer.println(OutgoingHandlerInterface.sendGameBoard(battleshipButtons));
 			writer.flush();
-			
-//			BattleShipGUI gui = new BattleShipGUI();
-//			new Thread(new MessageReader(socket, gui)).start();
-//			
-//			
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
 	}
 	
 	public void loginButtonActionPerformed(){
@@ -398,6 +400,18 @@ public class BattleShipGUI extends JFrame {
 	}
 	
 	private void resetButtonActionPerformed() {
+		//clear opponent board
+		clearOpponentBoard(grid2Buttons);
+		//clear my board
+		clearMyBoard(gridButtons);
+		//clear array
+		battleshipButtons.clear();
+		System.out.println("CLEARED ARRAY: " + battleshipButtons);
+		//reset method to place ships - countShips set back to 0
+		countShips = 0;
+	}
+	
+	public void restartButtonActionPerformed(){
 		writer.println(OutgoingHandlerInterface.restart());
 		writer.flush();
 		
