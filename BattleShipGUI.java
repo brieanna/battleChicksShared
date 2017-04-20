@@ -430,6 +430,16 @@ public class BattleShipGUI extends JFrame {
 		//hit or miss
 		
 	}
+
+	public void setTurn(boolean turn) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void hitMiss(boolean hit, String coordinate) {
+		// TODO Auto-generated method stub
+		
+	}
 		
 
 }
