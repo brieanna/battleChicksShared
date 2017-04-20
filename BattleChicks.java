@@ -26,7 +26,7 @@ public class BattleChicks extends JFrame {
 	private JButton[][] myBoard;
 	private int shipSize = 0;
 	private JRadioButton horizontal;
-	public JTextArea recieveChatTextArea;
+	public JTextArea receiveChatTextArea;
 	private JTextArea sendChatTextArea;
 	private JTextArea userNameTextArea;
 	private int xlShip;
@@ -74,9 +74,18 @@ public class BattleChicks extends JFrame {
 		userNameLbl.setText("username: ");
 		upperRightPnl.add(userNameLbl);
 
-		userNameTextArea = new JTextArea(3, 20);
+		userNameTextArea = new JTextArea(2, 10);
 		userNameTextArea.setEditable(true);
 		upperRightPnl.add(userNameTextArea);
+		
+		JButton loginBtn = new JButton("Login");
+		upperRightPnl.add(loginBtn);
+		loginBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				login();
+			}
+		});
 
 		horizontal = new JRadioButton("horizontal              ");
 		horizontal.setSelected(true);
@@ -125,9 +134,9 @@ public class BattleChicks extends JFrame {
 		upperRightPnl.add(mediumShip);
 		upperRightPnl.add(smallShip);
 
-		recieveChatTextArea = new JTextArea(20, 30);
-		recieveChatTextArea.setEditable(false);
-		upperLeftPnl.add(recieveChatTextArea);
+		receiveChatTextArea = new JTextArea(20, 30);
+		receiveChatTextArea.setEditable(false);
+		upperLeftPnl.add(receiveChatTextArea);
 
 		sendChatTextArea = new JTextArea(10, 30);
 		sendChatTextArea.setEditable(true);
@@ -176,15 +185,22 @@ public class BattleChicks extends JFrame {
 		frame.setVisible(true);
 	}
 
+	protected void start() {
+		if(shipCoordinates.size() == 19){
+		writer.println(OutgoingHandlerInterface.sendGameBoard(shipCoordinates));
+		writer.flush();		
+		}
+	}
+
 	protected void sendAction() {
 		if (isConnected) {
 			String sendTxt = sendChatTextArea.getText();
 			sendChatTextArea.setText("");
-			recieveChatTextArea.append(sendTxt + "\n");
+			receiveChatTextArea.append("you: " + sendTxt + "\n");
 			writer.println(OutgoingHandlerInterface.sendChat(sendTxt));
 			writer.flush();
 		} else {
-			recieveChatTextArea.append("Message not sent because you are not connected \n");
+			receiveChatTextArea.append("Message not sent because you are not connected \n");
 		}
 	}
 
@@ -342,9 +358,9 @@ public class BattleChicks extends JFrame {
 		}
 	}
 
-	public void start() {
+	public void login() {
 		String name = userNameTextArea.getText();
-		if (shipCoordinates.size() == 19 && !name.equals("")) {
+		if (!name.equals("")) {
 			try {
 				socket = new Socket(InetAddress.getByName("ec2-52-41-213-54.us-west-2.compute.amazonaws.com"), port);
 //				socket = new Socket(InetAddress.getByName("137.190.250.80"), port);
@@ -353,35 +369,10 @@ public class BattleChicks extends JFrame {
 				writer.println(OutgoingHandlerInterface.login(name));
 				writer.flush();
 
-				writer.println(OutgoingHandlerInterface.sendGameBoard(shipCoordinates));
-				writer.flush();
-				// writer.println(OutgoingHandlerInterface.restart());
-				// writer.flush();
-
-				// writer.println(OutgoingHandlerInterface.fire("A1"));
-				// writer.flush();
-
-				// writer.println(OutgoingHandlerInterface.whoIs());
-				// writer.flush();
-
-				// writer.println(OutgoingHandlerInterface.sendChat("late night
-				// coding!"));
-				// writer.flush();
-				//
-
-				// gb = new GameBoard();
 				BattleChicks bc = new BattleChicks();
 
 				new Thread(new MessageReader(socket, bc/* , gb */)).start();
 
-				// Scanner in = new Scanner(System.in);
-				// String spot = in.nextLine();
-				// writer.println(OutgoingHandlerInterface.fire(spot));
-				// writer.flush();
-				//
-				// String chat = in.nextLine();
-				// writer.println(OutgoingHandlerInterface.sendChat(chat));
-				// writer.flush();
 				isConnected = true;
 				updateTextArea.setText("You are now connected!");
 				// TODO: change color of myBoard to blue
@@ -393,6 +384,18 @@ public class BattleChicks extends JFrame {
 			updateTextArea.setText(
 					"Not all information ready to play. \n Place all ships, \n enter username, \n and press start to play.");
 		}
+	}
+	public void getChatMessage(String send){
+		receiveChatTextArea.append(send + "\n");
+	}
+	public void updateTextArea(String update){
+		updateTextArea.setText(update + "\n");
+		//win lose message
+		//ack login
+		//turn
+		//reset game
+		//hit or miss
+		
 	}
 
 	public static void main(String[] args) {
