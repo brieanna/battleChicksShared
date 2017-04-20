@@ -222,6 +222,7 @@ public class BattleChicks extends JFrame {
 			for (int column = 0; column < 10; column++) {
 				gameBoard[row][column] = new JButton("" + letter + column);
 				gameBoard[row][column].setName("" + letter + column);
+				//gameBoard[row][column].setBorder(null);
 				gameBoard[row][column].setOpaque(true);
 				gameBoard[row][column].setBackground(Color.lightGray);
 				gameBoard[row][column].setForeground(Color.GRAY);
@@ -244,12 +245,17 @@ public class BattleChicks extends JFrame {
 			// send missle
 			JButton myButton = ((JButton) e.getSource());
 			myButton.setBackground(Color.BLACK);
+			String coordinate = myButton.getText();
+			writer.println(OutgoingHandlerInterface.fire(coordinate));
+			writer.flush();
 			myButton.setText("X");
-			OutgoingHandlerInterface.fire(myButton.getText());
 //			System.out.println("Enemy board name: " + myButton.getName());
 		}
 	}
 
+	public void findCoordinates(String coordinate){
+		//TODO: add stuff from below
+	}
 	protected void addShipActionPerformed(ActionEvent e) {
 		if (isConnected) {
 			// does nothing
@@ -341,7 +347,7 @@ public class BattleChicks extends JFrame {
 		if (shipCoordinates.size() == 19 && !name.equals("")) {
 			try {
 				socket = new Socket(InetAddress.getByName("ec2-52-41-213-54.us-west-2.compute.amazonaws.com"), port);
-//				socket = new Socket(InetAddress.getByName("137.190.250.60"), port);
+//				socket = new Socket(InetAddress.getByName("137.190.250.80"), port);
 				writer = new PrintWriter(socket.getOutputStream());
 
 				writer.println(OutgoingHandlerInterface.login(name));

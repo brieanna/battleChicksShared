@@ -4,23 +4,30 @@ import org.json.JSONObject;
 
 public class IncomingHandlerInterface {
 private static JSONObject myObject;
+ static boolean turn; 
+
 	public static void handle(JSONObject message){
 		myObject = message;
 //		String first = myObject.getJSONObject("type").getString("message");
 		
-		String type = (String) message.opt("type");
+		String type = message.optString("type");
 		switch (type){
 		case "login":
 			System.out.println(type);
 			break;
 		case "application":
-			System.out.println(type);
+			// getting true or false for turn
+			JSONObject mess = message.optJSONObject("message");
+			turn = mess.optBoolean("turn");
+			System.out.println(type + "> " + turn);
 			break;
 		case "acknowledge":
-			System.out.println(type);
+			String ackMessage = message.optString("message");
+			System.out.println(type + "> " + ackMessage);
 			break;
 		case "chat":
-			System.out.println(type);
+			String chat = message.optString("message");
+			System.out.println(type + "> " + chat);
 			break;
 		case "message":
 			System.out.println(type);
@@ -29,15 +36,5 @@ private static JSONObject myObject;
 		
 	}
 	
-	public static void turn(JSONObject message){
-		//String turn = obj.getJSONObject("turn");
-		Object myTurn = message.opt("turn");
-		if(myTurn.equals("true")){
-			System.out.println("it was true!!!!");
-		}else{
-			System.out.println("it was false :(");
-		}
-		System.out.println("???");
-	}
 }
 // test
