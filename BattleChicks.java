@@ -40,8 +40,8 @@ public class BattleChicks extends JFrame {
 	private int lShip;
 	private int mShip;
 	private int sShip;
-	public static JTextArea updateTextArea;
 	boolean isConnected = false;
+	public static JTextArea updateTextArea;
 	static boolean turn = false;
 	
 	static char[] letters = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J' };
@@ -315,30 +315,34 @@ public class BattleChicks extends JFrame {
 			}
 		}
 	}
+	
+//	private void resetAction() {
+//		//clear opponent board
+//		clearOpponentBoard(grid2Buttons);
+//		//clear my board
+//		clearMyBoard(gridButtons);
+//		//clear array
+//		battleshipButtons.clear();
+//		System.out.println("CLEARED ARRAY: " + battleshipButtons);
+//		//reset method to place ships - countShips set back to 0
+//		countShips = 1;
+//	}
+	
+//	public void clearMyBoard(JButton[][] gridButtons)
+//	{
+//		for(int r = 0; r < 10; r++){
+//			for(int c = 0; c < 10; c++){
+//				gridButtons[r][c].setBackground(Color.GRAY);
+//			}
+//		}
+//	}
 
 	protected void addShipActionPerformed(ActionEvent e) {
 		if (isConnected) {
-//			char[] letters = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J' };
-//			char[] numbers = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-//			int row = 0;
-//			int column = 0;
 
 			String coordinate = ((JButton) e.getSource()).getText();
 			findCoordinates(coordinate);
-//			char[] coords = coordinate.toCharArray();
-//			Character[] Coo = { coords[0], coords[1] };
-//
-//			for (int x = 0; x < 10; x++) {
-//				if (Coo[0].equals(letters[x])) {
-//					row = x;
-//				} else {
-//				}
-//
-//				if (Coo[1].equals(numbers[x])) {
-//					column = x;
-//				} else {
-//				}
-//			}
+
 			switch (shipSize) {
 			case 2:
 				if (sShip < 2) {
