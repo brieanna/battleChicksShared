@@ -11,7 +11,7 @@ public class MessageReader implements Runnable {
 
 	private Socket socket;
 	private BufferedReader reader;
-	public BattleChicks battleGUI = new BattleChicks();
+	public BattleChicks battleGUI;
 
 	public MessageReader(Socket socket, BattleChicks battleGUI) throws IOException {
 		this.socket = socket;
@@ -24,10 +24,8 @@ public class MessageReader implements Runnable {
 		while (true) {
 			try {
 				String readIn = reader.readLine();
-//				battleGUI.recieveChatTextArea.append(r);
 				System.out.println("incoming: " + readIn);
 				JSONObject message = new JSONObject(readIn);
-//				IncomingHandlerInterface.turn(message);
 				IncomingHandlerInterface.handle(message);
 				
 			} catch (IOException e) {

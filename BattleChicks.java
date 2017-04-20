@@ -35,6 +35,12 @@ public class BattleChicks extends JFrame {
 	private int sShip;
 	JTextArea updateTextArea;
 	boolean isConnected = false;
+	boolean turn = false;
+	
+	char[] letters = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J' };
+	char[] numbers = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+	int row = 0;
+	int column = 0;
 
 	public void runBattleGUI() {
 		JFrame frame = new JFrame();
@@ -77,7 +83,7 @@ public class BattleChicks extends JFrame {
 		userNameTextArea = new JTextArea(2, 10);
 		userNameTextArea.setEditable(true);
 		upperRightPnl.add(userNameTextArea);
-		
+
 		JButton loginBtn = new JButton("Login");
 		upperRightPnl.add(loginBtn);
 		loginBtn.addActionListener(new ActionListener() {
@@ -161,7 +167,7 @@ public class BattleChicks extends JFrame {
 			}
 		});
 		upperRightPnl.add(startButton);
-		
+
 		// TODO: add login button: separate login and start buttons
 
 		updateTextArea = new JTextArea(10, 30);
@@ -171,14 +177,14 @@ public class BattleChicks extends JFrame {
 
 		JButton resetButton = new JButton();
 		resetButton.setText("RESET");
-		resetButton.addActionListener(new ActionListener(){
+		resetButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				writer.println(OutgoingHandlerInterface.restart());
 				writer.flush();
 				updateTextArea.setText("Game has been Reset.");
 				// TODO: need to add a GUI reset
-			}	
+			}
 		});
 		lowerRightPnl.add(resetButton);
 
@@ -186,9 +192,13 @@ public class BattleChicks extends JFrame {
 	}
 
 	protected void start() {
-		if(shipCoordinates.size() == 19){
-		writer.println(OutgoingHandlerInterface.sendGameBoard(shipCoordinates));
-		writer.flush();		
+		if (shipCoordinates.size() == 19 && isConnected) {
+			writer.println(OutgoingHandlerInterface.sendGameBoard(shipCoordinates));
+			writer.flush();
+		} else {
+			updateTextArea.setText(
+					"Not all information ready to play. \n Place all ships, \n enter username and login, \n and press start to play.");
+
 		}
 	}
 
@@ -238,7 +248,7 @@ public class BattleChicks extends JFrame {
 			for (int column = 0; column < 10; column++) {
 				gameBoard[row][column] = new JButton("" + letter + column);
 				gameBoard[row][column].setName("" + letter + column);
-				//gameBoard[row][column].setBorder(null);
+				// gameBoard[row][column].setBorder(null);
 				gameBoard[row][column].setOpaque(true);
 				gameBoard[row][column].setBackground(Color.lightGray);
 				gameBoard[row][column].setForeground(Color.GRAY);
@@ -246,8 +256,11 @@ public class BattleChicks extends JFrame {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
-
-						attackActionPerformed(e);
+						if (turn) {
+							attackActionPerformed(e);
+						} else {
+							updateTextArea.setText("NOT YOUR TURN");
+						}
 					}
 				});
 				panelc.add(gameBoard[row][column]);
@@ -265,46 +278,57 @@ public class BattleChicks extends JFrame {
 			writer.println(OutgoingHandlerInterface.fire(coordinate));
 			writer.flush();
 			myButton.setText("X");
-//			System.out.println("Enemy board name: " + myButton.getName());
+			// System.out.println("Enemy board name: " + myButton.getName());
 		}
 	}
 
-	public void findCoordinates(String coordinate){
-		//TODO: add stuff from below
+	public void findCoordinates(String coordinate) {
+		char[] coords = coordinate.toCharArray();
+		Character[] Coo = { coords[0], coords[1] };
+
+		for (int x = 0; x < 10; x++) {
+			if (Coo[0].equals(this.letters[x])) {
+				this.row = x;
+			} else {
+			}
+
+			if (Coo[1].equals(this.numbers[x])) {
+				this.column = x;
+			} else {
+			}
+		}
 	}
+
 	protected void addShipActionPerformed(ActionEvent e) {
 		if (isConnected) {
-			// does nothing
-		} else {
-			char[] letters = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J' };
-			char[] numbers = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-			int row = 0;
-			int column = 0;
+//			char[] letters = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J' };
+//			char[] numbers = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+//			int row = 0;
+//			int column = 0;
 
 			String coordinate = ((JButton) e.getSource()).getText();
-
-			char[] coords = coordinate.toCharArray();
-			Character[] Coo = { coords[0], coords[1] };
-
-			for (int x = 0; x < 10; x++) {
-				if (Coo[0].equals(letters[x])) {
-					row = x;
-				} else {
-				}
-
-				if (Coo[1].equals(numbers[x])) {
-					column = x;
-				} else {
-				}
-			}
+			findCoordinates(coordinate);
+//			char[] coords = coordinate.toCharArray();
+//			Character[] Coo = { coords[0], coords[1] };
+//
+//			for (int x = 0; x < 10; x++) {
+//				if (Coo[0].equals(letters[x])) {
+//					row = x;
+//				} else {
+//				}
+//
+//				if (Coo[1].equals(numbers[x])) {
+//					column = x;
+//				} else {
+//				}
+//			}
 			switch (shipSize) {
 			case 2:
 				if (sShip < 2) {
 					sShip++;
 					addShipToBoard(row, column);
 				} else {
-					updateTextArea.setText(
-							"All small ships placed. \n Place all ships, \n enter username, \n and press start to play.");
+					updateTextArea.setText("All small ships placed. \n Place all ships, \n and press start to play.");
 				}
 				break;
 			case 3:
@@ -312,8 +336,7 @@ public class BattleChicks extends JFrame {
 					mShip++;
 					addShipToBoard(row, column);
 				} else {
-					updateTextArea.setText(
-							"All medium ships placed. \nPlace all ships, \n enter username, \n and press start to play.");
+					updateTextArea.setText("All medium ships placed. \nPlace all ships, \n and press start to play.");
 				}
 				break;
 			case 4:
@@ -321,8 +344,7 @@ public class BattleChicks extends JFrame {
 					lShip++;
 					addShipToBoard(row, column);
 				} else {
-					updateTextArea.setText(
-							"All large ships placed. \n Place all ships, \n enter username, \n and press start to play.");
+					updateTextArea.setText("All large ships placed. \n Place all ships, \n and press start to play.");
 				}
 				break;
 			case 5:
@@ -330,16 +352,18 @@ public class BattleChicks extends JFrame {
 					xlShip++;
 					addShipToBoard(row, column);
 				} else {
-					updateTextArea.setText(
-							"All extra large ships placed. \n Place all ships, \n enter username, \n and press start to play.");
+					updateTextArea
+							.setText("All extra large ships placed. \n Place all ships, \n and press start to play.");
 				}
 				break;
 			default:
 				updateTextArea.setText(
-						"Select ship size and orientation to place ships.\n Place all ships, \n enter username, \n and press start to play.");
+						"Select ship size and orientation to place ships.\n Place all ships, \n and press start to play.");
 				break;
 
 			}
+		} else {
+			updateTextArea.setText("Login before placing ships");
 		}
 
 	}
@@ -363,7 +387,8 @@ public class BattleChicks extends JFrame {
 		if (!name.equals("")) {
 			try {
 				socket = new Socket(InetAddress.getByName("ec2-52-41-213-54.us-west-2.compute.amazonaws.com"), port);
-//				socket = new Socket(InetAddress.getByName("137.190.250.80"), port);
+				// socket = new Socket(InetAddress.getByName("137.190.250.80"),
+				// port);
 				writer = new PrintWriter(socket.getOutputStream());
 
 				writer.println(OutgoingHandlerInterface.login(name));
@@ -371,10 +396,10 @@ public class BattleChicks extends JFrame {
 
 				BattleChicks bc = new BattleChicks();
 
-				new Thread(new MessageReader(socket, bc/* , gb */)).start();
+				new Thread(new MessageReader(socket, bc)).start();
 
 				isConnected = true;
-				updateTextArea.setText("You are now connected!");
+//				updateTextArea.setText("You are now connected!");
 				// TODO: change color of myBoard to blue
 
 			} catch (IOException e) {
@@ -382,20 +407,22 @@ public class BattleChicks extends JFrame {
 			}
 		} else {
 			updateTextArea.setText(
-					"Not all information ready to play. \n Place all ships, \n enter username, \n and press start to play.");
+					"Not all information ready to play. \n Place all ships, \n enter username and login, \n and press start to play.");
 		}
 	}
-	public void getChatMessage(String send){
+
+	public void getChatMessage(String send) {
 		receiveChatTextArea.append(send + "\n");
 	}
-	public void updateTextArea(String update){
+
+	public void updateTextArea(String update) {
 		updateTextArea.setText(update + "\n");
-		//win lose message
-		//ack login
-		//turn
-		//reset game
-		//hit or miss
-		
+		// win lose message
+		// ack login
+		// turn
+		// reset game
+		// hit or miss
+
 	}
 
 	public static void main(String[] args) {
