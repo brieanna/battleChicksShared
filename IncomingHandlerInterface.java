@@ -59,9 +59,11 @@ public class IncomingHandlerInterface {
 		}
 		else if (mess.has("win")) {
 			win = mess.optString("win");
+			String winMessage = win + ": WINS!";
 			BattleChicks.setTurn(false);
-			BattleChicks.updateTextArea(win + ": WINS!");
-			BattleChicks.setChatMessage(win + ": WINS!");
+			BattleChicks.setWin(winMessage);
+			BattleChicks.updateTextArea(winMessage);
+			BattleChicks.setChatMessage(winMessage);
 		}
 		else if (mess.has("reset")) {
 			reset = mess.optBoolean("reset");

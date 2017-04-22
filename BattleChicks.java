@@ -19,6 +19,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.WindowConstants;
 
 public class BattleChicks extends JFrame {
 	/**
@@ -43,7 +44,11 @@ public class BattleChicks extends JFrame {
 	boolean isConnected = false;
 	public static JTextArea updateTextArea;
 	static boolean turn = false;
-	
+	static boolean win = false;
+	static JTextArea turnTextArea;
+	static JTextArea winTextArea;
+	static JPanel upperRightPnl;
+
 	static char[] letters = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J' };
 	static char[] numbers = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 	static int row = 0;
@@ -66,7 +71,7 @@ public class BattleChicks extends JFrame {
 		enemyGameBoard = createEnemyBoard(enemyBoard);
 		mainPanel.add(enemyBoard);
 
-		JPanel upperRightPnl = new JPanel();
+		upperRightPnl = new JPanel();
 		upperRightPnl.setVisible(true);
 		mainPanel.add(upperRightPnl);
 
@@ -146,11 +151,11 @@ public class BattleChicks extends JFrame {
 		upperRightPnl.add(largeShip);
 		upperRightPnl.add(mediumShip);
 		upperRightPnl.add(smallShip);
-		
+
 		receiveChatTextArea = new JTextArea(19, 29);
 		receiveChatTextArea.setEditable(false);
 		JScrollPane chatScrollPane = new JScrollPane(receiveChatTextArea);
-		chatScrollPane.setSize(20,30);
+		chatScrollPane.setSize(20, 30);
 		chatScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		chatScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		receiveChatTextArea.setLineWrap(true);
@@ -181,25 +186,30 @@ public class BattleChicks extends JFrame {
 		});
 		upperRightPnl.add(startButton);
 
+		turnTextArea = new JTextArea(5, 30);
+		turnTextArea.setEditable(false);
+		turnTextArea.setText("");
+		upperRightPnl.add(turnTextArea);
+
 		updateTextArea = new JTextArea(10, 30);
 		updateTextArea.setEditable(false);
 		updateTextArea.setLineWrap(true);
-		updateTextArea.setText("Place ships then press START");
+		updateTextArea.setText("Enter your name and press Login");
 		lowerRightPnl.add(updateTextArea);
 
 		JButton resetButton = new JButton();
 		resetButton.setText("RESET");
 		resetButton.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent e){
+			public void actionPerformed(ActionEvent e) {
 				updateTextArea.setText("GameBoard has been reset. \n Place ships and press Start to play again.");
 				resetCoordinates();
-				clearMyBoard(myBoard, Color.CYAN);
-				clearMyBoard(enemyGameBoard, Color.GRAY);
+				clearMyBoard(myBoard, Color.BLUE);
+				clearMyBoard(enemyGameBoard, Color.LIGHT_GRAY);
 			}
 		});
 		lowerRightPnl.add(resetButton);
-		
+
 		JButton restartButton = new JButton();
 		restartButton.setText("RESTART");
 		restartButton.addActionListener(new ActionListener() {
@@ -208,28 +218,35 @@ public class BattleChicks extends JFrame {
 				writer.println(OutgoingHandlerInterface.restart());
 				writer.flush();
 				updateTextArea.setText("Game has been Restarted. Please reset your game board.");
-							}
+			}
 		});
 		lowerRightPnl.add(restartButton);
-		
+
+		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
 		frame.setVisible(true);
+
 	}
 
 	protected void resetCoordinates() {
-		for (int x = 0; x < shipCoordinates.size(); x++){
-		shipCoordinates.remove(x);
+		for (int x = 0; x < shipCoordinates.size(); x++) {
+			shipCoordinates.remove(x);
 		}
 		sShip = 0;
 		mShip = 0;
 		lShip = 0;
 		xlShip = 0;
+		
+		winTextArea.setVisible(false);
+		
 	}
 
 	protected void start() {
 		if (shipCoordinates.size() == 19 && isConnected) {
 			writer.println(OutgoingHandlerInterface.sendGameBoard(shipCoordinates));
 			writer.flush();
-			clearMyBoard(enemyGameBoard, Color.BLUE); 
+			clearMyBoard(enemyGameBoard, Color.BLUE);
+			grayMyBoard();
 		} else {
 			updateTextArea.setText(
 					"Not all information ready to play. \n Place all ships, \n enter username and login, \n and press start to play.");
@@ -276,7 +293,7 @@ public class BattleChicks extends JFrame {
 	}
 
 	private JButton[][] gameBoard2 = new JButton[10][10];
-	
+
 	public JButton[][] createEnemyBoard(JPanel panelc) {
 		panelc.setLayout(new GridLayout(10, 10));
 		char letter = 'A';
@@ -286,8 +303,8 @@ public class BattleChicks extends JFrame {
 				gameBoard2[row][column].setName("" + letter + column);
 				// gameBoard2[row][column].setBorder(null);
 				gameBoard2[row][column].setOpaque(true);
-				gameBoard2[row][column].setBackground(Color.lightGray);
-				gameBoard2[row][column].setForeground(Color.GRAY);
+				gameBoard2[row][column].setBackground(Color.LIGHT_GRAY);
+				gameBoard2[row][column].setForeground(Color.LIGHT_GRAY);
 				gameBoard2[row][column].addActionListener(new ActionListener() {
 
 					@Override
@@ -310,12 +327,12 @@ public class BattleChicks extends JFrame {
 		if (isConnected) {
 			// send missile
 			JButton myButton = ((JButton) e.getSource());
-//			myButton.setBackground(Color.BLACK);
+			// myButton.setBackground(Color.BLACK);
 			String coordinate = myButton.getText();
 			writer.println(OutgoingHandlerInterface.fire(coordinate));
 			writer.flush();
-//			myButton.setText("X");
-					}
+			// myButton.setText("X");
+		}
 	}
 
 	public static void findCoordinates(String coordinate) {
@@ -334,11 +351,10 @@ public class BattleChicks extends JFrame {
 			}
 		}
 	}
-	
-	public void clearMyBoard(JButton[][] board, Color color)
-	{
-		for(int r = 0; r < 10; r++){
-			for(int c = 0; c < 10; c++){
+
+	public void clearMyBoard(JButton[][] board, Color color) {
+		for (int r = 0; r < 10; r++) {
+			for (int c = 0; c < 10; c++) {
 				board[r][c].setBackground(color);
 				board[r][c].setForeground(color);
 				board[r][c].setText("" + letters[r] + c);
@@ -399,6 +415,7 @@ public class BattleChicks extends JFrame {
 	}
 
 	private void addShipToBoard(int row, int column) {
+		// TODO: add functionality so that ships cannot overlap or go off the board.
 		for (int y = 0; y < shipSize; y++) {
 			if (horizontal.isSelected()) {
 				myBoard[row][column + y].setBackground(Color.MAGENTA);
@@ -427,8 +444,10 @@ public class BattleChicks extends JFrame {
 				new Thread(new MessageReader(socket, bc)).start();
 
 				isConnected = true;
-				// TODO: change color of myBoard to blue
 				clearMyBoard(myBoard, Color.BLUE);
+
+				turnTextArea.setText(
+						"Place Ships and press start to play. \n 1 XL ship \n 1 L ship \n 2 M ships \n 2 S ships");
 
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -439,6 +458,18 @@ public class BattleChicks extends JFrame {
 		}
 	}
 
+	public void grayMyBoard() {
+		for (int r = 0; r < 10; r++) {
+			for (int c = 0; c < 10; c++) {
+				if (myBoard[r][c].getBackground().equals(Color.BLUE)) {
+					myBoard[r][c].setBackground(Color.LIGHT_GRAY);
+				} else {
+					myBoard[r][c].setBackground(Color.PINK);
+				}
+			}
+		}
+	}
+
 	public static void setChatMessage(String send) {
 		receiveChatTextArea.append(send + "\n");
 	}
@@ -446,41 +477,51 @@ public class BattleChicks extends JFrame {
 	public static void updateTextArea(String update) {
 		updateTextArea.setText(update + "\n");
 	}
-	public static void setTurn(Boolean myTurn){
-		turn = myTurn;
-		if(turn){
-			updateTextArea.setText("Your Turn");
-		}else{
-			updateTextArea.setText("NOT your turn");
+
+	public static void setTurn(Boolean myTurn) {
+		if (!win) {
+			turn = myTurn;
+		}
+		if (turn) {
+			turnTextArea.setText("Your Turn");
+		} else {
+			turnTextArea.setText("NOT your turn");
 		}
 	}
 	
-	public static void hitMiss(Boolean hit, String coordinate){
+	public static void setWin(String winMessage){
+		win = true;
+		winTextArea = new JTextArea(5, 30);
+		winTextArea.setEditable(false);
+		winTextArea.setText("***** " + winMessage + " *****");
+		winTextArea.setForeground(Color.RED);
+		upperRightPnl.add(winTextArea);
+	}
+
+	public static void hitMiss(Boolean hit, String coordinate) {
 		findCoordinates(coordinate);
-		if(turn && hit){
-			updateTextArea.append("   HIT");
+		if (turn && hit) {
+			updateTextArea.setText("   HIT");
 			enemyGameBoard[row][column].setBackground(Color.RED);
 			enemyGameBoard[row][column].setText("X");
 			enemyGameBoard[row][column].setForeground(Color.RED);
-		}
-		else if(turn && !hit){
-			updateTextArea.append("   HIT");
+		} else if (turn && !hit) {
+			updateTextArea.setText("   MISS");
 			enemyGameBoard[row][column].setBackground(Color.BLACK);
 			enemyGameBoard[row][column].setText("O");
 			enemyGameBoard[row][column].setForeground(Color.BLACK);
-		}
-		else if(!turn && hit){
-			updateTextArea.append("   MISS");
+		} else if (!turn && hit) {
+			updateTextArea.setText("   HIT");
 			myBoard[row][column].setBackground(Color.RED);
 			myBoard[row][column].setText("X");
 			myBoard[row][column].setForeground(Color.RED);
-		}
-		else if(!turn && !hit){
-			updateTextArea.append("   MISS");
+		} else if (!turn && !hit) {
+			updateTextArea.setText("   MISS");
 			myBoard[row][column].setBackground(Color.BLACK);
 			myBoard[row][column].setText("O");
 			myBoard[row][column].setForeground(Color.BLACK);
 		}
-		
+
 	}
+
 }
