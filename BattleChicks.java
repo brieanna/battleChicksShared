@@ -181,8 +181,6 @@ public class BattleChicks extends JFrame {
 		});
 		upperRightPnl.add(startButton);
 
-		// TODO: add login button: separate login and start buttons
-
 		updateTextArea = new JTextArea(10, 30);
 		updateTextArea.setEditable(false);
 		updateTextArea.setLineWrap(true);
@@ -193,26 +191,48 @@ public class BattleChicks extends JFrame {
 		resetButton.setText("RESET");
 		resetButton.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent e) {
-				writer.println(OutgoingHandlerInterface.restart());
-				writer.flush();
-				updateTextArea.setText("Game has been Reset.");
-				// TODO: need to add a GUI reset
+			public void actionPerformed(ActionEvent e){
+				updateTextArea.setText("GameBoard has been reset. \n Place ships and press Start to play again.");
+				resetCoordinates();
+				clearMyBoard(myBoard, Color.CYAN);
+				clearMyBoard(enemyGameBoard, Color.GRAY);
 			}
 		});
 		lowerRightPnl.add(resetButton);
-
+		
+		JButton restartButton = new JButton();
+		restartButton.setText("RESTART");
+		restartButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				writer.println(OutgoingHandlerInterface.restart());
+				writer.flush();
+				updateTextArea.setText("Game has been Restarted. Please reset your game board.");
+							}
+		});
+		lowerRightPnl.add(restartButton);
+		
 		frame.setVisible(true);
+	}
+
+	protected void resetCoordinates() {
+		for (int x = 0; x < shipCoordinates.size(); x++){
+		shipCoordinates.remove(x);
+		}
+		sShip = 0;
+		mShip = 0;
+		lShip = 0;
+		xlShip = 0;
 	}
 
 	protected void start() {
 		if (shipCoordinates.size() == 19 && isConnected) {
 			writer.println(OutgoingHandlerInterface.sendGameBoard(shipCoordinates));
 			writer.flush();
+			clearMyBoard(enemyGameBoard, Color.BLUE); 
 		} else {
 			updateTextArea.setText(
 					"Not all information ready to play. \n Place all ships, \n enter username and login, \n and press start to play.");
-
 		}
 	}
 
@@ -238,8 +258,8 @@ public class BattleChicks extends JFrame {
 				gameBoard[row][column] = new JButton("" + letter + column);
 				gameBoard[row][column].setName("" + letter + column);
 				gameBoard[row][column].setOpaque(true);
-				gameBoard[row][column].setBackground(Color.BLUE);
-				gameBoard[row][column].setForeground(Color.BLUE);
+				gameBoard[row][column].setBackground(Color.CYAN);
+				gameBoard[row][column].setForeground(Color.CYAN);
 				gameBoard[row][column].addActionListener(new ActionListener() {
 
 					@Override
@@ -288,15 +308,14 @@ public class BattleChicks extends JFrame {
 
 	protected void attackActionPerformed(ActionEvent e) {
 		if (isConnected) {
-			// send missle
+			// send missile
 			JButton myButton = ((JButton) e.getSource());
-			myButton.setBackground(Color.BLACK);
+//			myButton.setBackground(Color.BLACK);
 			String coordinate = myButton.getText();
 			writer.println(OutgoingHandlerInterface.fire(coordinate));
 			writer.flush();
-			myButton.setText("X");
-			// System.out.println("Enemy board name: " + myButton.getName());
-		}
+//			myButton.setText("X");
+					}
 	}
 
 	public static void findCoordinates(String coordinate) {
@@ -316,26 +335,16 @@ public class BattleChicks extends JFrame {
 		}
 	}
 	
-//	private void resetAction() {
-//		//clear opponent board
-//		clearOpponentBoard(grid2Buttons);
-//		//clear my board
-//		clearMyBoard(gridButtons);
-//		//clear array
-//		battleshipButtons.clear();
-//		System.out.println("CLEARED ARRAY: " + battleshipButtons);
-//		//reset method to place ships - countShips set back to 0
-//		countShips = 1;
-//	}
-	
-//	public void clearMyBoard(JButton[][] gridButtons)
-//	{
-//		for(int r = 0; r < 10; r++){
-//			for(int c = 0; c < 10; c++){
-//				gridButtons[r][c].setBackground(Color.GRAY);
-//			}
-//		}
-//	}
+	public void clearMyBoard(JButton[][] board, Color color)
+	{
+		for(int r = 0; r < 10; r++){
+			for(int c = 0; c < 10; c++){
+				board[r][c].setBackground(color);
+				board[r][c].setForeground(color);
+				board[r][c].setText("" + letters[r] + c);
+			}
+		}
+	}
 
 	protected void addShipActionPerformed(ActionEvent e) {
 		if (isConnected) {
@@ -392,11 +401,11 @@ public class BattleChicks extends JFrame {
 	private void addShipToBoard(int row, int column) {
 		for (int y = 0; y < shipSize; y++) {
 			if (horizontal.isSelected()) {
-				myBoard[row][column + y].setBackground(Color.WHITE);
+				myBoard[row][column + y].setBackground(Color.MAGENTA);
 				String coordinate = myBoard[row][column + y].getText();
 				shipCoordinates.add(coordinate);
 			} else { // vertical
-				myBoard[row + y][column].setBackground(Color.WHITE);
+				myBoard[row + y][column].setBackground(Color.MAGENTA);
 				String coordinate = myBoard[row + y][column].getText();
 				shipCoordinates.add(coordinate);
 			}
@@ -408,8 +417,6 @@ public class BattleChicks extends JFrame {
 		if (!name.equals("")) {
 			try {
 				socket = new Socket(InetAddress.getByName("ec2-52-41-213-54.us-west-2.compute.amazonaws.com"), port);
-				// socket = new Socket(InetAddress.getByName("137.190.250.80"),
-				// port);
 				writer = new PrintWriter(socket.getOutputStream());
 
 				writer.println(OutgoingHandlerInterface.login(name));
@@ -420,8 +427,8 @@ public class BattleChicks extends JFrame {
 				new Thread(new MessageReader(socket, bc)).start();
 
 				isConnected = true;
-//				updateTextArea.setText("You are now connected!");
 				// TODO: change color of myBoard to blue
+				clearMyBoard(myBoard, Color.BLUE);
 
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -438,11 +445,6 @@ public class BattleChicks extends JFrame {
 
 	public static void updateTextArea(String update) {
 		updateTextArea.setText(update + "\n");
-		// win lose message
-		// ack login
-		// turn
-		// reset game
-		// hit or miss
 	}
 	public static void setTurn(Boolean myTurn){
 		turn = myTurn;
