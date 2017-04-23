@@ -190,6 +190,12 @@ public class BattleChicks extends JFrame {
 		turnTextArea.setEditable(false);
 		turnTextArea.setText("");
 		upperRightPnl.add(turnTextArea);
+		
+		winTextArea = new JTextArea(5, 30);
+		winTextArea.setEditable(false);
+		winTextArea.setForeground(Color.RED);
+		winTextArea.setVisible(false);
+		upperRightPnl.add(winTextArea);
 
 		updateTextArea = new JTextArea(10, 30);
 		updateTextArea.setEditable(false);
@@ -229,9 +235,17 @@ public class BattleChicks extends JFrame {
 	}
 
 	protected void resetCoordinates() {
+		System.out.println("before removed: " + shipCoordinates);
+		System.out.println(shipCoordinates.size());
 		for (int x = 0; x < shipCoordinates.size(); x++) {
 			shipCoordinates.remove(x);
+			System.out.println("ship " + x + " has been removed");
 		}
+//		for(String coords: shipCoordinates){
+//			shipCoordinates.remove(coords);
+//		}
+		System.out.println("ships have been removed? " + shipCoordinates);
+		
 		sShip = 0;
 		mShip = 0;
 		lShip = 0;
@@ -301,7 +315,6 @@ public class BattleChicks extends JFrame {
 			for (int column = 0; column < 10; column++) {
 				gameBoard2[row][column] = new JButton("" + letter + column);
 				gameBoard2[row][column].setName("" + letter + column);
-				// gameBoard2[row][column].setBorder(null);
 				gameBoard2[row][column].setOpaque(true);
 				gameBoard2[row][column].setBackground(Color.LIGHT_GRAY);
 				gameBoard2[row][column].setForeground(Color.LIGHT_GRAY);
@@ -325,13 +338,10 @@ public class BattleChicks extends JFrame {
 
 	protected void attackActionPerformed(ActionEvent e) {
 		if (isConnected) {
-			// send missile
 			JButton myButton = ((JButton) e.getSource());
-			// myButton.setBackground(Color.BLACK);
 			String coordinate = myButton.getText();
 			writer.println(OutgoingHandlerInterface.fire(coordinate));
 			writer.flush();
-			// myButton.setText("X");
 		}
 	}
 
@@ -461,7 +471,7 @@ public class BattleChicks extends JFrame {
 	public void grayMyBoard() {
 		for (int r = 0; r < 10; r++) {
 			for (int c = 0; c < 10; c++) {
-				if (myBoard[r][c].getBackground().equals(Color.BLUE)) {
+				if (myBoard[r][c].getBackground().equals(Color.BLUE) || myBoard[r][c].getBackground().equals(Color.LIGHT_GRAY)) {
 					myBoard[r][c].setBackground(Color.LIGHT_GRAY);
 				} else {
 					myBoard[r][c].setBackground(Color.PINK);
@@ -491,11 +501,8 @@ public class BattleChicks extends JFrame {
 	
 	public static void setWin(String winMessage){
 		win = true;
-		winTextArea = new JTextArea(5, 30);
-		winTextArea.setEditable(false);
+		winTextArea.setVisible(true);
 		winTextArea.setText("***** " + winMessage + " *****");
-		winTextArea.setForeground(Color.RED);
-		upperRightPnl.add(winTextArea);
 	}
 
 	public static void hitMiss(Boolean hit, String coordinate) {

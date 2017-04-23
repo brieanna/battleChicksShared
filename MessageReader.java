@@ -34,21 +34,3 @@ public class MessageReader implements Runnable {
 		}
 	}
 }
-//try and ObjectMapper
-/*
- * import jackson
- * ObjectMapper mapper  = new ObjectMapper();
- * final ArbiterOneResponse response = mapper.readValue(jsonResponse, ArbiterOneResponseclass):
- * 
- * [4/19/17, 10:35:46 AM] Ray Cox: import com.fasterxml.jackson.annotation.JsonInclude;
-	import com.fasterxml.jackson.core.JsonProcessingException;
-	import com.fasterxml.jackson.databind.DeserializationFeature;
-	import com.fasterxml.jackson.databind.ObjectMapper;
-	import com.fasterxml.jackson.databind.SerializationFeature;
-	import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
-<dependency>
-<groupId>org.glassfish.jersey.media</groupId>
-<artifactId>jersey-media-json-jackson</artifactId>
-<version>${jersey.version}</version>
-</dependency>
- */

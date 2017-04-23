@@ -8,7 +8,6 @@ public class IncomingHandlerInterface {
 	static boolean reset;
 	static boolean hit;
 	static String win;
-	// static BattleChicks gui = new BattleChicks();
 	static JSONObject myObject;
 
 	public static void handle(JSONObject message) {
