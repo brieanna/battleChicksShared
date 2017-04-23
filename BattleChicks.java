@@ -241,9 +241,7 @@ public class BattleChicks extends JFrame {
 			shipCoordinates.remove(x);
 			System.out.println("ship " + x + " has been removed");
 		}
-//		for(String coords: shipCoordinates){
-//			shipCoordinates.remove(coords);
-//		}
+
 		System.out.println("ships have been removed? " + shipCoordinates);
 		
 		sShip = 0;
