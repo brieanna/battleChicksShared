@@ -34,7 +34,6 @@ public class BattleChicks extends JFrame {
 	private static JButton[][] enemyGameBoard;
 	private int shipSize = 0;
 	private JRadioButton horizontal;
-	private JRadioButton vertical;
 	public static JTextArea receiveChatTextArea;
 	private JTextArea sendChatTextArea;
 	private JTextArea userNameTextArea;
@@ -108,7 +107,7 @@ public class BattleChicks extends JFrame {
 
 		horizontal = new JRadioButton("horizontal              ");
 		horizontal.setSelected(true);
-		vertical = new JRadioButton("vertical                  ");
+		JRadioButton vertical = new JRadioButton("vertical                  ");
 		ButtonGroup directionBtnGroup = new ButtonGroup();
 		directionBtnGroup.add(horizontal);
 		directionBtnGroup.add(vertical);
@@ -237,9 +236,9 @@ public class BattleChicks extends JFrame {
 		mShip = 0;
 		lShip = 0;
 		xlShip = 0;
-
+		
 		winTextArea.setVisible(false);
-
+		
 	}
 
 	protected void start() {
@@ -417,44 +416,17 @@ public class BattleChicks extends JFrame {
 
 	private void addShipToBoard(int row, int column) {
 		// TODO: add functionality so that ships cannot overlap or go off the board.
-		// the color wont show if the ships overlap but then the ship cannot be placed again..... FIXED!!?
 		for (int y = 0; y < shipSize; y++) {
-			String hCoordinate = myBoard[row][column + y].getText();
-			String vCoordinate = myBoard[row + y][column].getText();
-			if (horizontal.isSelected() && coordinateNotAdded(hCoordinate)) {
+			if (horizontal.isSelected()) {
 				myBoard[row][column + y].setBackground(Color.MAGENTA);
-				shipCoordinates.add(hCoordinate);
-			} else if(vertical.isSelected() && coordinateNotAdded(vCoordinate)) { 
+				String coordinate = myBoard[row][column + y].getText();
+				shipCoordinates.add(coordinate);
+			} else { // vertical
 				myBoard[row + y][column].setBackground(Color.MAGENTA);
-				shipCoordinates.add(vCoordinate);
-			}
-			else{
-//				decrease ship count
-				switch(shipSize){
-				case 2:
-					sShip --;
-					break;
-				case 3: 
-					mShip --;
-					break;
-				case 4: 
-					lShip --;
-					break;
-				case 5: 
-					xlShip --;
-					break;
-				}
+				String coordinate = myBoard[row + y][column].getText();
+				shipCoordinates.add(coordinate);
 			}
 		}
-	}
-
-	private boolean coordinateNotAdded(String coordinate) {
-		if (shipCoordinates.contains(coordinate)) {
-			return false;
-		} else {
-			return true;
-		}
-
 	}
 
 	public void login() {
@@ -516,8 +488,8 @@ public class BattleChicks extends JFrame {
 			turnTextArea.setText("NOT your turn");
 		}
 	}
-
-	public static void setWin(String winMessage) {
+	
+	public static void setWin(String winMessage){
 		win = true;
 		winTextArea = new JTextArea(5, 30);
 		winTextArea.setEditable(false);
