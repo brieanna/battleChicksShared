@@ -7,6 +7,4 @@ public class PlayBattleJank {
 		BattleChicks bc = new BattleChicks();
 		bc.runBattleGUI();
 	}
-
-
 }
