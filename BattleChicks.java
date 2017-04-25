@@ -243,6 +243,8 @@ public class BattleChicks extends JFrame {
 		lShip = 0;
 		xlShip = 0;
 		
+		win = false;
+		
 		winTextArea.setVisible(false);
 		
 	}
