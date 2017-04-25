@@ -235,14 +235,8 @@ public class BattleChicks extends JFrame {
 	}
 
 	protected void resetCoordinates() {
-		System.out.println("before removed: " + shipCoordinates);
-		System.out.println(shipCoordinates.size());
-		for (int x = 0; x < shipCoordinates.size(); x++) {
-			shipCoordinates.remove(x);
-			System.out.println("ship " + x + " has been removed");
-		}
-
-		System.out.println("ships have been removed? " + shipCoordinates);
+		
+		shipCoordinates.clear();
 		
 		sShip = 0;
 		mShip = 0;
