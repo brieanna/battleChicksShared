@@ -419,7 +419,6 @@ public class BattleChicks extends JFrame {
 	}
 
 	private void addShipToBoard(int row, int column) {
-		// TODO: add functionality so that ships cannot overlap or go off the board.
 		for (int y = 0; y < shipSize; y++) {
 			if (horizontal.isSelected()) {
 				myBoard[row][column + y].setBackground(Color.MAGENTA);
