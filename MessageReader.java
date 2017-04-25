@@ -9,16 +9,9 @@ import org.json.JSONObject;
 
 public class MessageReader implements Runnable {
 
-	private Socket socket;
 	private BufferedReader reader;
-	private BattleShipGUI gui;
-
 	public MessageReader(Socket socket, BattleShipGUI gui) throws IOException {
-		this.socket = socket;
-		this.gui = gui;
-
 		reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		//reader.readLine();
 	}
 
 	@Override
@@ -26,9 +19,9 @@ public class MessageReader implements Runnable {
 
 		while (true) {
 			try {
-				String r = reader.readLine();
-				System.out.println("incoming: " + r);
-				JSONObject message =  new JSONObject(r);
+				String read = reader.readLine();
+				System.out.println("incoming: " + read);
+				JSONObject message =  new JSONObject(read);
 				IncomingHandlerInterface.handle(message);
 			} catch (IOException e) {
 				e.printStackTrace();

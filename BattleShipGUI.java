@@ -3,7 +3,6 @@ package BattleChicks;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -34,22 +33,28 @@ public class BattleShipGUI extends JFrame {
 			shipPanel, winLosePanel;
 	private static JLabel headLabel, userNameLabel, label;
 	private static JTextField userNameTextField;
-	private static JTextArea chatTextArea, textTextArea, instructionTextArea, winLoseTextArea;
+	private static JTextArea chatTextArea, textTextArea, instructionTextArea, updateTextArea;
 	private static JScrollPane chatScrollPane, textScrollPane;
 	public JButton[][] gridButtons = new JButton[10][10];
 	public JButton[][] grid2Buttons = new JButton[10][10];
-	public JButton[][] myBoard;
+	public static JButton[][] myBoard;
+	public static JButton[][] opponentBoard;
 	public static JRadioButton verticalRadio, horizontalRadio;
 	private static JButton sendButton, startButton, resetButton, loginButton, restartButton;
 	private static String instructions = "Instructions\nEnter your username.\nPlace all five ships on your grid "
-			+ "and hit the submit button.\nThe ships will be placed in the order listed below. Select horizontal"
+			+ "and hit the START button.\nThe ships will be placed in the order listed below. Select horizontal"
 			+ " or vertical to change the direction they are being placed.\n\n"
 			+ "Your username will be added and you will be connected to the game.\n"
 			+ "In order to make a hit, press the appropriate button on your opponents grid.\n"
 			+ "2 - Two Square  2 - Three Square  1 - Four Square  1 - Five Square";
 	private static ArrayList<String> battleshipButtons = new ArrayList<String>();
 	private static ButtonGroup group;
+	static boolean turn = false;
 	public int countShips = 1;
+	static char[] letters = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J' };
+	static char[] numbers = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+	static int r = 0;
+	static int c = 0;
 	
 	private Socket socket;
 	private int port = 8989;
@@ -139,9 +144,9 @@ public class BattleShipGUI extends JFrame {
 
 		winLosePanel = new JPanel();
 		winLosePanel.setVisible(true);
-		winLoseTextArea = new JTextArea(20,40);
-		winLoseTextArea.setEditable(false);
-		winLosePanel.add(winLoseTextArea);
+		updateTextArea = new JTextArea(20,40);
+		updateTextArea.setEditable(false);
+		winLosePanel.add(updateTextArea);
 		headPanel.add(winLosePanel);
 		twoPanel.add(headPanel);
 
@@ -151,7 +156,7 @@ public class BattleShipGUI extends JFrame {
 		opponentPanel = new JPanel(new GridLayout(10, 10));
 		opponentPanel.setVisible(true);
 		opponentPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
-		buildOpponentBoard(opponentPanel);
+		opponentBoard = buildOpponentBoard(opponentPanel);
 
 		threePanel.add(opponentPanel);
 
@@ -161,8 +166,7 @@ public class BattleShipGUI extends JFrame {
 		chatPanel = new JPanel();
 		chatTextArea = new JTextArea(20, 40);
 		chatTextArea.setLineWrap(true);
-		chatTextArea.setEditable(false);
-		
+		chatTextArea.setEditable(false);		
 		
 		chatScrollPane = new JScrollPane(chatTextArea);
 		chatScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -274,23 +278,23 @@ public class BattleShipGUI extends JFrame {
 	}
 
 	public void opponentButtonActionPerformed(ActionEvent e) {
-		((JButton) e.getSource()).setBackground(Color.MAGENTA);
 		String clickedButton = ((JButton) e.getSource()).getText();
 		System.out.println(clickedButton);
 		
-		writer.println(OutgoingHandlerInterface.fire(clickedButton));
-		writer.flush();
+		if(turn){
+			writer.println(OutgoingHandlerInterface.fire(clickedButton));
+			writer.flush();
+		}else if(!turn){
+			writer.flush();
+		}
 	}
 
-	public void myButtonActionPerformed(ActionEvent e) {
-		String coordinate = ((JButton) e.getSource()).getText();
+	
+	public static void findCordinates(String coordinate)
+	{
 		char[] coords = coordinate.toCharArray();
 		Character[] charArray = { coords[0], coords[1] };
-		char[] letters = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J' };
-		char[] numbers = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-		int r = 0;
-		int c = 0;
-
+		
 		for (int x = 0; x < 10; x++) {
 			if (charArray[0].equals(letters[x])) {
 
@@ -305,10 +309,12 @@ public class BattleShipGUI extends JFrame {
 				System.out.print("column else " + x + " ,");
 			}
 		}
+	}
+	public void myButtonActionPerformed(ActionEvent e) {
+		String coordinate = ((JButton) e.getSource()).getText();
+		findCordinates(coordinate);
 
 		addShipsToBoard(r, c);
-		
-		System.out.println(battleshipButtons);
 	}
 
 	public ActionListener addShipsToBoard(int r, int c) {
@@ -400,15 +406,11 @@ public class BattleShipGUI extends JFrame {
 	}
 	
 	private void resetButtonActionPerformed() {
-		//clear opponent board
 		clearOpponentBoard(grid2Buttons);
-		//clear my board
 		clearMyBoard(gridButtons);
-		//clear array
 		battleshipButtons.clear();
 		System.out.println("CLEARED ARRAY: " + battleshipButtons);
-		//reset method to place ships - countShips set back to 0
-		countShips = 0;
+		countShips = 1;
 	}
 	
 	public void restartButtonActionPerformed(){
@@ -417,27 +419,42 @@ public class BattleShipGUI extends JFrame {
 		
 	}
 	
-	public void getChatMessage(String send){
-		chatTextArea.append(send + "\n");
+	public void setChatMessage(String send){
+		chatTextArea.setText(send + "\n");
 	}
 	
 	public void updateTextArea(String update){
-		winLoseTextArea.setText(update + "\n");
-		//win lose message
-		//ack login
-		//turn
-		//reset game
-		//hit or miss
-		
+		updateTextArea.setText(update + "\n");	
 	}
 
-	public void setTurn(boolean turn) {
-		// TODO Auto-generated method stub
-		
+	public static void setTurn(Boolean myTurn){
+		turn = myTurn;
+		if(turn){
+			updateTextArea.append("Your Turn\n");
+		}else{
+			updateTextArea.append("NOT your turn\n");
+		}
 	}
+	
 
-	public void hitMiss(boolean hit, String coordinate) {
-		// TODO Auto-generated method stub
+	public static void hitMiss(Boolean hit, String coordinate){
+		findCordinates(coordinate);
+		if(turn && hit){
+			updateTextArea.setText("   HIT\n");
+			opponentBoard[r][c].setBackground(Color.MAGENTA);
+		}
+		else if(turn && !hit){
+			updateTextArea.setText("   MISS\n");
+			opponentBoard[r][c].setBackground(Color.BLACK);
+		}
+		else if(!turn && hit){
+			updateTextArea.setText("   HIT\n");
+			myBoard[r][c].setBackground(Color.MAGENTA);
+		}
+		else if(!turn && !hit){
+			updateTextArea.setText("   MISS\n");
+			myBoard[r][c].setBackground(Color.BLACK);
+		}
 		
 	}
 		

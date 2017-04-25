@@ -35,7 +35,7 @@ public class IncomingHandlerInterface {
 			String chat = message.optString("message");
 			String name = message.optString("fromUser");
 			String send = name + ": " + chat;
-			gui.getChatMessage(send);
+			gui.setChatMessage(send);
 			System.out.println(type + "> " + chat);
 			break;
 
@@ -50,18 +50,18 @@ public class IncomingHandlerInterface {
 	public static void applicationHandler(JSONObject mess) {
 		if (mess.has("turn")) {
 			turn = mess.optBoolean("turn");
-			gui.setTurn(turn);
+			BattleShipGUI.setTurn(turn);
 		}
 		else if (mess.has("hit")) {
 			hit = mess.optBoolean("hit");
 			String coordinate = mess.optString("coordinate");
-			gui.hitMiss(hit, coordinate);
+			BattleShipGUI.hitMiss(hit, coordinate);
 		}
 		else if (mess.has("win")) {
 			win = mess.optString("win");
-			gui.setTurn(false);
+			BattleShipGUI.setTurn(false);
 			gui.updateTextArea(win + ": WINS!");
-			gui.getChatMessage(win + ": WINS!");
+			gui.setChatMessage(win + ": WINS!");
 		}
 		else if (mess.has("reset")) {
 			reset = mess.optBoolean("reset");
