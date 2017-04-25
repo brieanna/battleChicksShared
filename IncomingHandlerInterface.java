@@ -67,7 +67,6 @@ public class IncomingHandlerInterface {
 		else if (mess.has("reset")) {
 			reset = mess.optBoolean("reset");
 			BattleChicks.updateTextArea("Game has ended please reset board.");
-			//when I restart and upload a game as the same 2 players I am un able to start a game, the turn is false for both players
 		}
 	}
 }
