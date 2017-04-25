@@ -9,12 +9,10 @@ import org.json.JSONObject;
 
 public class MessageReader implements Runnable {
 
-	private Socket socket;
 	private BufferedReader reader;
 	public BattleChicks battleGUI;
 
 	public MessageReader(Socket socket, BattleChicks battleGUI) throws IOException {
-		this.socket = socket;
 		reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		this.battleGUI = battleGUI;
 	}
