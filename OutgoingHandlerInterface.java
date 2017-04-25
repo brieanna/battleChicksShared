@@ -45,11 +45,6 @@ public class OutgoingHandlerInterface {
 		message.put("message", board);
 		System.out.println(message.toString());
 		return message.toString();
-		/*
-		 * {"type":"application","message":{"module":
-		 * "battlechicks","gameboard"😞"A1","B1","C1","A6","B6","C6","A5","B5",
-		 * "C5","A4","B4","C4","A3","B3","C3","A2","B2","C2","A7"]}}
-		 */
 	}
 
 	public static String fire(String spot) {

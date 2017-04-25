@@ -29,8 +29,8 @@ public class BattleShipGUI extends JFrame {
 	private PrintWriter writer;
 	private static JFrame frame;
 	private static JPanel mainPanel, headPanel, chatPanel, textPanel, opponentPanel, myGridPanel, instructionPanel,
-			sendPanel, onePanel, twoPanel, threePanel, fourPanel, fivePanel, sixPanel, usernamePanel,
-			shipPanel, winLosePanel;
+			sendPanel, onePanel, twoPanel, threePanel, fourPanel, fivePanel, sixPanel, usernamePanel, shipPanel,
+			winLosePanel;
 	private static JLabel headLabel, userNameLabel, label;
 	private static JTextField userNameTextField;
 	private static JTextArea chatTextArea, textTextArea, instructionTextArea, updateTextArea;
@@ -55,7 +55,7 @@ public class BattleShipGUI extends JFrame {
 	static char[] numbers = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 	static int r = 0;
 	static int c = 0;
-	
+
 	private Socket socket;
 	private int port = 8989;
 
@@ -80,7 +80,7 @@ public class BattleShipGUI extends JFrame {
 		instructionTextArea.setLineWrap(true);
 		instructionTextArea.setEditable(false);
 		instructionPanel.add(instructionTextArea);
-		shipPanel = new JPanel(new GridLayout(2,3));
+		shipPanel = new JPanel(new GridLayout(2, 3));
 		group = new ButtonGroup();
 		verticalRadio = new JRadioButton("Vertical Ship", true);
 		verticalRadio.setBorder(new EmptyBorder(10, 50, 10, 0));
@@ -144,7 +144,7 @@ public class BattleShipGUI extends JFrame {
 
 		winLosePanel = new JPanel();
 		winLosePanel.setVisible(true);
-		updateTextArea = new JTextArea(20,40);
+		updateTextArea = new JTextArea(20, 40);
 		updateTextArea.setEditable(false);
 		winLosePanel.add(updateTextArea);
 		headPanel.add(winLosePanel);
@@ -166,8 +166,8 @@ public class BattleShipGUI extends JFrame {
 		chatPanel = new JPanel();
 		chatTextArea = new JTextArea(20, 40);
 		chatTextArea.setLineWrap(true);
-		chatTextArea.setEditable(false);		
-		
+		chatTextArea.setEditable(false);
+
 		chatScrollPane = new JScrollPane(chatTextArea);
 		chatScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		chatPanel.add(chatScrollPane);
@@ -240,11 +240,10 @@ public class BattleShipGUI extends JFrame {
 		}
 		return grid2Buttons;
 	}
-	
-	public void clearOpponentBoard(JButton[][] grid2Buttons)
-	{
-		for(int r = 0; r < 10; r++){
-			for(int c = 0; c < 10; c++){
+
+	public void clearOpponentBoard(JButton[][] grid2Buttons) {
+		for (int r = 0; r < 10; r++) {
+			for (int c = 0; c < 10; c++) {
 				grid2Buttons[r][c].setBackground(Color.GRAY);
 			}
 		}
@@ -267,11 +266,10 @@ public class BattleShipGUI extends JFrame {
 		}
 		return gridButtons;
 	}
-	
-	public void clearMyBoard(JButton[][] gridButtons)
-	{
-		for(int r = 0; r < 10; r++){
-			for(int c = 0; c < 10; c++){
+
+	public void clearMyBoard(JButton[][] gridButtons) {
+		for (int r = 0; r < 10; r++) {
+			for (int c = 0; c < 10; c++) {
 				gridButtons[r][c].setBackground(Color.GRAY);
 			}
 		}
@@ -280,21 +278,19 @@ public class BattleShipGUI extends JFrame {
 	public void opponentButtonActionPerformed(ActionEvent e) {
 		String clickedButton = ((JButton) e.getSource()).getText();
 		System.out.println(clickedButton);
-		
-		if(turn){
+
+		if (turn) {
 			writer.println(OutgoingHandlerInterface.fire(clickedButton));
 			writer.flush();
-		}else if(!turn){
+		} else if (!turn) {
 			writer.flush();
 		}
 	}
 
-	
-	public static void findCordinates(String coordinate)
-	{
+	public static void findCordinates(String coordinate) {
 		char[] coords = coordinate.toCharArray();
 		Character[] charArray = { coords[0], coords[1] };
-		
+
 		for (int x = 0; x < 10; x++) {
 			if (charArray[0].equals(letters[x])) {
 
@@ -310,6 +306,7 @@ public class BattleShipGUI extends JFrame {
 			}
 		}
 	}
+
 	public void myButtonActionPerformed(ActionEvent e) {
 		String coordinate = ((JButton) e.getSource()).getText();
 		findCordinates(coordinate);
@@ -354,19 +351,19 @@ public class BattleShipGUI extends JFrame {
 	}
 
 	public ActionListener buildShip(int r, int c, int size) {
-			if (verticalRadio.isSelected()) {
-				for (int i = 0; i < size; i++) {
-					myBoard[r + i][c].setBackground(Color.PINK);
-					String coord = myBoard[r + i][c].getText();
-					battleshipButtons.add(coord);
-				}
-			} else if (horizontalRadio.isSelected()) {
-				for (int i = 0; i < size; i++) {
-					myBoard[r][c + i].setBackground(Color.PINK);
-					String coord = myBoard[r][c + i].getText();
-					battleshipButtons.add(coord);
-				}
+		if (verticalRadio.isSelected()) {
+			for (int i = 0; i < size; i++) {
+				myBoard[r + i][c].setBackground(Color.PINK);
+				String coord = myBoard[r + i][c].getText();
+				battleshipButtons.add(coord);
 			}
+		} else if (horizontalRadio.isSelected()) {
+			for (int i = 0; i < size; i++) {
+				myBoard[r][c + i].setBackground(Color.PINK);
+				String coord = myBoard[r][c + i].getText();
+				battleshipButtons.add(coord);
+			}
+		}
 
 		return null;
 	}
@@ -382,29 +379,28 @@ public class BattleShipGUI extends JFrame {
 	}
 
 	public void startButtonActionPerformed() {
-			writer.println(OutgoingHandlerInterface.sendGameBoard(battleshipButtons));
-			writer.flush();
+		writer.println(OutgoingHandlerInterface.sendGameBoard(battleshipButtons));
+		writer.flush();
 	}
-	
-	public void loginButtonActionPerformed(){
+
+	public void loginButtonActionPerformed() {
 		String username = userNameTextField.getText();
 		try {
 			socket = new Socket(InetAddress.getByName("ec2-52-41-213-54.us-west-2.compute.amazonaws.com"), port);
-			//socket = new Socket(InetAddress.getByName("137.190.250.60"), port);
 			writer = new PrintWriter(socket.getOutputStream());
-			
+
 			writer.println(OutgoingHandlerInterface.login(username));
 			writer.flush();
-			
+
 			BattleShipGUI gui = new BattleShipGUI();
 			new Thread(new MessageReader(socket, gui)).start();
-						
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
-	
+
 	private void resetButtonActionPerformed() {
 		clearOpponentBoard(grid2Buttons);
 		clearMyBoard(gridButtons);
@@ -412,51 +408,46 @@ public class BattleShipGUI extends JFrame {
 		System.out.println("CLEARED ARRAY: " + battleshipButtons);
 		countShips = 1;
 	}
-	
-	public void restartButtonActionPerformed(){
+
+	public void restartButtonActionPerformed() {
 		writer.println(OutgoingHandlerInterface.restart());
 		writer.flush();
-		
-	}
-	
-	public void setChatMessage(String send){
-		chatTextArea.setText(send + "\n");
-	}
-	
-	public void updateTextArea(String update){
-		updateTextArea.setText(update + "\n");	
+
 	}
 
-	public static void setTurn(Boolean myTurn){
+	public void setChatMessage(String send) {
+		chatTextArea.setText(send + "\n");
+	}
+
+	public void updateTextArea(String update) {
+		updateTextArea.setText(update + "\n");
+	}
+
+	public static void setTurn(Boolean myTurn) {
 		turn = myTurn;
-		if(turn){
+		if (turn) {
 			updateTextArea.append("Your Turn\n");
-		}else{
+		} else {
 			updateTextArea.append("NOT your turn\n");
 		}
 	}
-	
 
-	public static void hitMiss(Boolean hit, String coordinate){
+	public static void hitMiss(Boolean hit, String coordinate) {
 		findCordinates(coordinate);
-		if(turn && hit){
+		if (turn && hit) {
 			updateTextArea.setText("   HIT\n");
 			opponentBoard[r][c].setBackground(Color.MAGENTA);
-		}
-		else if(turn && !hit){
+		} else if (turn && !hit) {
 			updateTextArea.setText("   MISS\n");
 			opponentBoard[r][c].setBackground(Color.BLACK);
-		}
-		else if(!turn && hit){
+		} else if (!turn && hit) {
 			updateTextArea.setText("   HIT\n");
 			myBoard[r][c].setBackground(Color.MAGENTA);
-		}
-		else if(!turn && !hit){
+		} else if (!turn && !hit) {
 			updateTextArea.setText("   MISS\n");
 			myBoard[r][c].setBackground(Color.BLACK);
 		}
-		
+
 	}
-		
 
 }
